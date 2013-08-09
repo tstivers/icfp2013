@@ -45,13 +45,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\GameClient\GameClient.csproj">
+    <ProjectReference Include="..\GameClient\Game.csproj">
       <Project>{15DDF3CB-74B1-494B-964D-E28D9B06F1BF}</Project>
-      <Name>GameClient</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Shared\Shared.csproj">
-      <Project>{69cfbb1a-fef1-4f15-a978-4fa3dc883212}</Project>
-      <Name>Shared</Name>
+      <Name>Game</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
