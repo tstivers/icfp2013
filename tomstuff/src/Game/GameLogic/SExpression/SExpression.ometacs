@@ -9,7 +9,8 @@ ometa SExpression.GeneratedCode.SExpressionParser : Parser {
 					| Id
 					| "(" Op1Expression:e1 ")" -> { e1 }
 					| "(" Op2Expression:e2 ")" -> { e2 }					
-					| "(" If0Expression:i0 ")" -> { i0 },
+					| "(" If0Expression:i0 ")" -> { i0 }
+					| "(" FoldExpression:fe ")" -> { fe },
 
 	Id			= Spaces Letter:l (LetterOrDigit | '_')*:v -> { new SId(l.ToString() + v.ToLiteralString()) },		
 	
@@ -19,7 +20,9 @@ ometa SExpression.GeneratedCode.SExpressionParser : Parser {
 
 	Op2Expression = Op2:op Expression:e1 Expression:e2 -> { new SOp2Expression(op.ToString(), e1.As<SExpression>(), e2.As<SExpression>()) },
 
-	If0Expression = "if0" Expression:e1 Expression:e2 Expression:e3 -> { new If0Expression(e1.As<SExpression>(), e2.As<SExpression>(), e3.As<SExpression>()) },
+	If0Expression = "if0" Expression:e1 Expression:e2 Expression:e3 -> { new SIf0Expression(e1.As<SExpression>(), e2.As<SExpression>(), e3.As<SExpression>()) },
+
+	FoldExpression = "fold" Expression:e1 Expression:e2 "(" "lambda" "(" Id:id1 Id:id2 ")" Expression:e3 ")" -> { new SFoldExpression(e1.As<SExpression>(), e2.As<SExpression>(), id1.As<SId>(), id2.As<SId>(), e3.As<SExpression>()) },
 
 	Op1 = "not" | "shl1" | "shr1" | "shr4" | "shr16",
 

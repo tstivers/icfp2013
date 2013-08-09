@@ -1,4 +1,4 @@
-﻿namespace SExpression
+﻿namespace GameClient.SExpression
 {
     public class SProgram
     {
@@ -9,6 +9,24 @@
         {
             Id = id;
             Expression = expression;
+        }
+
+        public ulong[] Eval(ulong[] input)
+        {
+            var output = new ulong[input.Length];
+            for (int i = 0; i < input.Length; i++)
+                output[i] = Eval(input[i]);
+
+            return output;
+        }
+
+        private ulong Eval(ulong input)
+        {
+            var context = new EvalContext();
+
+            context[Id] = new SNumber(input);
+
+            return Expression.Eval(context);
         }
     }
 }

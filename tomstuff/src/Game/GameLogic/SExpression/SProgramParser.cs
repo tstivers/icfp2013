@@ -2,7 +2,7 @@
 using OMetaSharp;
 using SExpression.GeneratedCode;
 
-namespace SExpression
+namespace GameClient.SExpression
 {
     public class SProgramParser
     {

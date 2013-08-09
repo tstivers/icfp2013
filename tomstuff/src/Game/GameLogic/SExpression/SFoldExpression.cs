@@ -1,0 +1,34 @@
+﻿using System;
+
+namespace GameClient.SExpression
+{
+    public class SFoldExpression : SExpression
+    {
+        public SExpression Expression1 { get; set; }
+        public SExpression Expression2 { get; set; }
+        public SId Id1 { get; set; }
+        public SId Id2 { get; set; }
+        public SExpression Expression3 { get; set; }
+
+        public SFoldExpression(SExpression expression1, SExpression expression2, SId id1, SId id2,
+            SExpression expression3)
+        {
+            Expression1 = expression1;
+            Expression2 = expression2;
+            Id1 = id1;
+            Id2 = id2;
+            Expression3 = expression3;
+        }
+
+        public override string ToString()
+        {
+            return String.Format("(fold {0} {1} (lambda ({2} {3}) {4}))", Expression1, Expression2, Id1, Id2,
+                Expression3);
+        }
+
+        public override ulong Eval(EvalContext context)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}

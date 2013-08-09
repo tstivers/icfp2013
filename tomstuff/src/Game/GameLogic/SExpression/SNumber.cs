@@ -1,8 +1,8 @@
-﻿namespace SExpression
+﻿namespace GameClient.SExpression
 {
     public class SNumber : SExpression
     {
-        public ulong Number { get; set; }       
+        public ulong Number { get; set; }
 
         public SNumber(string value)
         {
@@ -11,9 +11,19 @@
             Number = num;
         }
 
+        public SNumber(ulong value)
+        {
+            Number = value;
+        }
+
         public override string ToString()
         {
             return Number.ToString();
+        }
+
+        public override ulong Eval(EvalContext context)
+        {
+            return Number;
         }
     }
 }
