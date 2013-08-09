@@ -2,19 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using GameClient.SExpressionTree;
 using log4net;
 
-namespace GameClient.Services
+namespace GameClient.SExpressionTree
 {
     public class SProgramGenerator
     {
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         private string[][] opPool;
         public int Size { get; set; }
-        public string[] Operators { get; set; }
-
-        private List<SExpression> _expressionPool = new List<SExpression>();
+        public string[] Operators { get; set; }              
 
         public SProgramGenerator(int size, string[] operators)
         {
@@ -30,7 +27,7 @@ namespace GameClient.Services
         }
 
         public SProgram[] GeneratePrograms()
-        {
+        {           
             Log.InfoFormat("Generating all programs of size {0} using operators {1}", Size, String.Join(",", Operators.Select(x => "\"" + x + "\"")));
             throw new NotImplementedException();
         }

@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Text;
 
-ometa SExpression.GeneratedCode.SExpressionParser : Parser {
+ometa GameClient.SExpressionTree.GeneratedCode.SExpressionParser : Parser {
 	SProgram	= "(" "lambda" "(" Id:id ")" Expression:e ")" -> { new SProgram(id.As<SId>(), e.As<SExpression>()) },				
 
 	Expression  =	NumberExpression 
@@ -24,7 +24,7 @@ ometa SExpression.GeneratedCode.SExpressionParser : Parser {
 
 	FoldExpression = "fold" Expression:e1 Expression:e2 "(" "lambda" "(" Id:id1 Id:id2 ")" Expression:e3 ")" -> { new SFoldExpression(e1.As<SExpression>(), e2.As<SExpression>(), id1.As<SId>(), id2.As<SId>(), e3.As<SExpression>()) },
 
-	Op1 = "not" | "shl1" | "shr1" | "shr4" | "shr16",
+	Op1 = ("not" | "shl1" | "shr16" | "shr1" | "shr4"):op Spaces -> { op },
 
-	Op2 = "and" | "or" | "xor" | "plus"
+	Op2 = ("and" | "or" | "xor" | "plus"):op Spaces -> { op }
 }
