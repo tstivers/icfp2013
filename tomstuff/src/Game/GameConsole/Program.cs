@@ -18,7 +18,7 @@ namespace GameConsole
             XmlConfigurator.Configure();
             Log.Info("Starting game console runner");
 
-            SExpression.SProgramParser.PrettyPrint("(lambda (x_123) (if0 (not 1) 1 0))");
+            SExpression.SProgramParser.PrettyPrint("(lambda (x_123) (if0 (not 1) 1 x))");
 
             return;
 

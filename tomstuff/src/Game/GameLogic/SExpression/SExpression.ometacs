@@ -11,7 +11,7 @@ ometa SExpression.GeneratedCode.SExpressionParser : Parser {
 					| "(" Op2Expression:e2 ")" -> { e2 }					
 					| "(" If0Expression:i0 ")" -> { i0 },
 
-	Id			= Spaces Letter:l (LetterOrDigit | '_')+:v -> { new SId(l.ToString() + v.ToString()) },		
+	Id			= Spaces Letter:l (LetterOrDigit | '_')*:v -> { new SId(l.ToString() + v.ToLiteralString()) },		
 	
 	NumberExpression = ("0" | "1"):n -> { new SNumber(n.ToString()) },
 

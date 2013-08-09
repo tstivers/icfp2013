@@ -186,7 +186,7 @@ namespace SExpression.GeneratedCode
                         return MetaRules.Fail(out result2, out modifiedStream2);
                     }
                     l = result2;
-                    if(!MetaRules.Many1(
+                    if(!MetaRules.Many(
                         delegate(OMetaStream<char> inputStream3, out OMetaList<HostExpression> result3, out OMetaStream <char> modifiedStream3)
                         {
                             modifiedStream3 = inputStream3;
@@ -220,7 +220,7 @@ namespace SExpression.GeneratedCode
                         return MetaRules.Fail(out result2, out modifiedStream2);
                     }
                     v = result2;
-                    result2 = ( new SId(l.ToString() + v.ToString()) ).AsHostExpressionList();
+                    result2 = ( new SId(l.ToString() + v.ToLiteralString()) ).AsHostExpressionList();
                     return MetaRules.Success();
                 }, modifiedStream, out result, out modifiedStream))
             {
