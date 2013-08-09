@@ -28,7 +28,18 @@ namespace GameClient.SExpression
 
         public override ulong Eval(EvalContext context)
         {
-            throw new NotImplementedException();
+            var e0 = Expression1.Eval(context);
+            var e1 = Expression2.Eval(context);
+
+            var lcontext = new EvalContext(context);
+
+            foreach (var b in BitConverter.GetBytes(e1))
+            {
+                context[Id1] = new SNumber(b);
+                context[Id2] = new SNumber(e1);
+            }
+
+            return 0;
         }
     }
 }

@@ -75,7 +75,6 @@
     <Compile Include="Extensions\RestClientExtensions.cs" />
     <Compile Include="Services\GameClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Services\ProgramEvaluater.cs" />
     <Compile Include="SExpression\EvalContext.cs" />
     <Compile Include="SExpression\SFoldExpression.cs" />
     <Compile Include="SExpression\GeneratedCode\SExpressionParser.cs" />
