@@ -4,9 +4,9 @@ using GameClient.ViewModels;
 
 namespace GameClient.Solvers
 {
-    public class StupidSolver : SolverBase
+    public class Size3Solver : SolverBase
     {
-        public StupidSolver(IGameClient client) : base(client)
+        public Size3Solver(IGameClient client) : base(client)
         {
         }
 

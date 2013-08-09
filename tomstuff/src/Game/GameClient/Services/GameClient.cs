@@ -45,10 +45,7 @@ namespace GameClient.Services
 
             request.AddParameter("auth", AuthToken, ParameterType.UrlSegment);
 
-            IRestResponse<List<Problem>> response = _client.GameExecute<List<Problem>>(request);
-
-            if (response.StatusCode != HttpStatusCode.OK)
-                throw new Exception("Service call returned invalid response");
+            IRestResponse<List<Problem>> response = _client.GameExecute<List<Problem>>(request);          
 
             return response.Data;
         }
@@ -77,12 +74,6 @@ namespace GameClient.Services
 
             IRestResponse<Problem> response = _client.GameExecute<Problem>(request);
 
-            if (response.StatusCode != HttpStatusCode.OK)
-                throw new Exception("Service call returned invalid response");
-
-            if (response.ErrorException != null)
-                throw response.ErrorException;
-
             return response.Data;
         }
 
@@ -103,12 +94,6 @@ namespace GameClient.Services
 
             IRestResponse<EvalResponse> response = _client.GameExecute<EvalResponse>(request);
 
-            if (response.StatusCode != HttpStatusCode.OK)
-                throw new Exception("Service call returned invalid response");
-
-            if (response.ErrorException != null)
-                throw response.ErrorException;
-
             EvalResponse evalResponse = response.Data;
 
             if (evalResponse.Status != "ok")
@@ -128,12 +113,6 @@ namespace GameClient.Services
             request.AddBody(guessRequest);
 
             IRestResponse<GuessResponse> response = _client.GameExecute<GuessResponse>(request);
-
-            if (response.StatusCode != HttpStatusCode.OK)
-                throw new Exception("Service call returned invalid response");
-
-            if (response.ErrorException != null)
-                throw response.ErrorException;
 
             GuessResponse guessResponse = response.Data;
 

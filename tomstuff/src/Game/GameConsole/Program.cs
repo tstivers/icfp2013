@@ -10,14 +10,15 @@ namespace GameConsole
     {
         private static void Main(string[] args)
         {
-            var client = new GameClient.Services.GameClient("0236vFGLj5xt5pYPigGQyveWYTGMysQaU4Ot3siN");
+            var client = new GameClient.Services.GameClient(args[0]);
 
             IEnumerable<Problem> problems = client.GetProblems();
 
             // create a solver controller
             var controller = new SimpleController(client);
 
-            controller.Train(3, TrainingOperators.Empty);
+            controller.Train(4, TrainingOperators.Empty);
+            //controller.Guess();
 
             Debugger.Break();
         }

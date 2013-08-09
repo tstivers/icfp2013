@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Threading;
 using RestSharp;
 
@@ -16,6 +17,12 @@ namespace GameClient.Extensions
                 if ((int) response.StatusCode == 429)
                     Thread.Sleep(TimeSpan.FromSeconds(20));
             } while ((int) response.StatusCode == 429);
+
+            if (response.StatusCode != HttpStatusCode.OK)
+                throw new Exception("Service call returned invalid response");
+
+            if (response.ErrorException != null)
+                throw response.ErrorException;
 
             return response;
         }

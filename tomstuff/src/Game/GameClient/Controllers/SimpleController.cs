@@ -9,10 +9,16 @@ namespace GameClient.Controllers
     public class SimpleController
     {
         private readonly IGameClient _client;
+        private readonly SolverBase[] _solvers;
 
         public SimpleController(IGameClient client)
         {
             _client = client;
+            _solvers = new SolverBase[]
+            {
+                new Size3Solver(_client),
+                new Size4Solver(_client), 
+            };
         }
 
         public void Train(int size, TrainingOperators operators)
@@ -21,9 +27,11 @@ namespace GameClient.Controllers
             {
                 Problem problem = _client.GetTrainingProblem(size, operators);
 
-                var solver = new StupidSolver(_client);
-
-                solver.Solve(problem);
+                foreach (var solver in _solvers)
+                {
+                    if (solver.CanSolve(problem))
+                        solver.Solve(problem);
+                }
 
                 Debugger.Break();
             }
@@ -31,10 +39,18 @@ namespace GameClient.Controllers
 
         public void Guess()
         {
-            IEnumerable<Problem> problems = _client.GetProblems();
+            IEnumerable<Problem> problems = _client.GetProblems();            
 
             foreach (Problem problem in problems)
             {
+                if (problem.Solved)
+                    continue;
+
+                foreach (var solver in _solvers)
+                {
+                    if (solver.CanSolve(problem))
+                        solver.Solve(problem);
+                }
             }
         }
     }
