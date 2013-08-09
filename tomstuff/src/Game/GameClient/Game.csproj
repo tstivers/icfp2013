@@ -50,6 +50,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="log4net, Version=1.2.11.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.5.0.6\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -67,9 +70,9 @@
   <ItemGroup>
     <Compile Include="Controllers\SimpleController.cs" />
     <Compile Include="Extensions\RestClientExtensions.cs" />
-    <Compile Include="Models\ProblemContext.cs" />
     <Compile Include="Services\GameClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\ProgramEvaluater.cs" />
     <Compile Include="Solvers\Size4Solver.cs" />
     <Compile Include="Solvers\SolverBase.cs" />
     <Compile Include="Solvers\Size3Solver.cs" />

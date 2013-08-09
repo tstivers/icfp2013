@@ -1,15 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
+﻿using System.Diagnostics;
+using System.Reflection;
 using GameClient.Services;
 using GameClient.ViewModels;
+using log4net;
 
 namespace GameClient.Solvers
 {
     public class Size4Solver : SolverBase
     {
+        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+
         public Size4Solver(IGameClient client) : base(client)
         {
         }

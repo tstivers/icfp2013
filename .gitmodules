@@ -1,0 +1,3 @@
+[submodule "SExpression.NET"]
+	path = SExpression.NET
+url=https://github.com/TeamMeh/SExpression.NET.git

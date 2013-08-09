@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
+using System.Reflection;
 using GameClient.Extensions;
 using GameClient.ViewModels;
+using log4net;
 using RestSharp;
 
 namespace GameClient.Services
@@ -25,6 +26,7 @@ namespace GameClient.Services
 
     public class GameClient : IGameClient
     {
+        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         private readonly IRestClient _client;
         public string AuthToken { get; set; }
         public string Endpoint { get; set; }
@@ -45,7 +47,7 @@ namespace GameClient.Services
 
             request.AddParameter("auth", AuthToken, ParameterType.UrlSegment);
 
-            IRestResponse<List<Problem>> response = _client.GameExecute<List<Problem>>(request);          
+            IRestResponse<List<Problem>> response = _client.GameExecute<List<Problem>>(request);
 
             return response.Data;
         }
