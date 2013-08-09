@@ -1,0 +1,12 @@
+C:\Users\tstivers\icfp2013\tomstuff\src\Game\GameLogic\obj\x86\Debug\GameLogic.csprojResolveAssemblyReference.cache
+C:\Users\tstivers\icfp2013\tomstuff\src\Game\GameLogic\obj\x86\Debug\GameClient.dll
+C:\Users\tstivers\icfp2013\tomstuff\src\Game\GameLogic\obj\x86\Debug\GameClient.pdb
+C:\Users\tstivers\icfp2013\tomstuff\src\Game\GameLogic\bin\x86\Debug\GameClient.dll
+C:\Users\tstivers\icfp2013\tomstuff\src\Game\GameLogic\bin\x86\Debug\GameClient.pdb
+C:\Users\tstivers\icfp2013\tomstuff\src\Game\GameLogic\bin\x86\Debug\log4net.dll
+C:\Users\tstivers\icfp2013\tomstuff\src\Game\GameLogic\bin\x86\Debug\Newtonsoft.Json.dll
+C:\Users\tstivers\icfp2013\tomstuff\src\Game\GameLogic\bin\x86\Debug\OMetaSharp.dll
+C:\Users\tstivers\icfp2013\tomstuff\src\Game\GameLogic\bin\x86\Debug\RestSharp.dll
+C:\Users\tstivers\icfp2013\tomstuff\src\Game\GameLogic\bin\x86\Debug\Newtonsoft.Json.xml
+C:\Users\tstivers\icfp2013\tomstuff\src\Game\GameLogic\bin\x86\Debug\OMetaSharp.pdb
+C:\Users\tstivers\icfp2013\tomstuff\src\Game\GameLogic\bin\x86\Debug\RestSharp.xml

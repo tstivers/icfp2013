@@ -1,0 +1,27 @@
+﻿using OMetaSharp;
+using System.Collections;
+using System.Text;
+
+ometa SExpression.GeneratedCode.SExpressionParser : Parser {
+	SProgram	= "(" "lambda" "(" Id:id ")" Expression:e ")" -> { new SProgram(id.As<SId>(), e.As<SExpression>()) },				
+
+	Expression  =	NumberExpression 
+					| Id
+					| "(" Op1Expression:e1 ")" -> { e1 }
+					| "(" Op2Expression:e2 ")" -> { e2 }					
+					| "(" If0Expression:i0 ")" -> { i0 },
+
+	Id			= Spaces Letter:l (LetterOrDigit | '_')+:v -> { new SId(l.ToString() + v.ToString()) },		
+	
+	NumberExpression = ("0" | "1"):n -> { new SNumber(n.ToString()) },
+
+	Op1Expression = Op1:op Expression:e -> { new SOp1Expression(op.ToString(), e.As<SExpression>()) },
+
+	Op2Expression = Op2:op Expression:e1 Expression:e2 -> { new SOp2Expression(op.ToString(), e1.As<SExpression>(), e2.As<SExpression>()) },
+
+	If0Expression = "if0" Expression:e1 Expression:e2 Expression:e3 -> { new If0Expression(e1.As<SExpression>(), e2.As<SExpression>(), e3.As<SExpression>()) },
+
+	Op1 = "not" | "shl1" | "shr1" | "shr4" | "shr16",
+
+	Op2 = "and" | "or" | "xor" | "plus"
+}
