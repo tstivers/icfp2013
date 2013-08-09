@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GameClient.SExpression
+namespace GameClient.SExpressionTree
 {
     public class SId : SExpression
     {
@@ -34,8 +34,10 @@ namespace GameClient.SExpression
 
         public override string ToString()
         {
-            return String.Format("[{0}]", Id);
+            return String.Format("{0}", Id);
         }
+
+        public override int Size { get { return 1; } }
 
         public override ulong Eval(EvalContext context)
         {

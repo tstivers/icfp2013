@@ -75,17 +75,18 @@
     <Compile Include="Extensions\RestClientExtensions.cs" />
     <Compile Include="Services\GameClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SExpression\EvalContext.cs" />
-    <Compile Include="SExpression\SFoldExpression.cs" />
-    <Compile Include="SExpression\GeneratedCode\SExpressionParser.cs" />
-    <Compile Include="SExpression\SIf0Expression.cs" />
-    <Compile Include="SExpression\SExpression.cs" />
-    <Compile Include="SExpression\SId.cs" />
-    <Compile Include="SExpression\SNumber.cs" />
-    <Compile Include="SExpression\SOp1Expression.cs" />
-    <Compile Include="SExpression\SOp2Expression.cs" />
-    <Compile Include="SExpression\SProgram.cs" />
-    <Compile Include="SExpression\SProgramParser.cs" />
+    <Compile Include="Services\SProgramGenerator.cs" />
+    <Compile Include="SExpressionTree\EvalContext.cs" />
+    <Compile Include="SExpressionTree\GeneratedCode\SExpressionParser.cs" />
+    <Compile Include="SExpressionTree\SExpression.cs" />
+    <Compile Include="SExpressionTree\SFoldExpression.cs" />
+    <Compile Include="SExpressionTree\SId.cs" />
+    <Compile Include="SExpressionTree\SIf0Expression.cs" />
+    <Compile Include="SExpressionTree\SNumber.cs" />
+    <Compile Include="SExpressionTree\SOp1Expression.cs" />
+    <Compile Include="SExpressionTree\SOp2Expression.cs" />
+    <Compile Include="SExpressionTree\SProgram.cs" />
+    <Compile Include="SExpressionTree\SProgramParser.cs" />
     <Compile Include="Solvers\Size4Solver.cs" />
     <Compile Include="Solvers\SolverBase.cs" />
     <Compile Include="Solvers\Size3Solver.cs" />
@@ -98,7 +99,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="SExpression\SExpression.ometacs" />
+    <None Include="SExpressionTree\SExpression.ometacs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

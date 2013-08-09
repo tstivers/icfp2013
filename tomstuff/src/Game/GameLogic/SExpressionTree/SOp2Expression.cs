@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GameClient.SExpression
+namespace GameClient.SExpressionTree
 {
     public enum Op2Op
     {
@@ -27,6 +27,8 @@ namespace GameClient.SExpression
         {
             return String.Format("({0} {1} {2})", Op, Expression1, Expression2);
         }
+
+        public override int Size { get { return 1 + Expression1.Size + Expression2.Size; } }
 
         public override ulong Eval(EvalContext context)
         {

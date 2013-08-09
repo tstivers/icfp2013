@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace GameClient.SExpression
+namespace GameClient.SExpressionTree
 {
     public class EvalContext : Dictionary<SId, SExpression>
     {

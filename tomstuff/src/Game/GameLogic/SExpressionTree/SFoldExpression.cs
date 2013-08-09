@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GameClient.SExpression
+namespace GameClient.SExpressionTree
 {
     public class SFoldExpression : SExpression
     {
@@ -26,6 +26,8 @@ namespace GameClient.SExpression
                 Expression3);
         }
 
+        public override int Size { get { return 2 + Expression1.Size + Expression2.Size + Expression3.Size; } }
+
         public override ulong Eval(EvalContext context)
         {
             var e0 = Expression1.Eval(context);
@@ -38,6 +40,8 @@ namespace GameClient.SExpression
                 context[Id1] = new SNumber(b);
                 context[Id2] = new SNumber(e1);
             }
+
+            throw new NotImplementedException();
 
             return 0;
         }

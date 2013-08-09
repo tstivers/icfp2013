@@ -1,7 +1,6 @@
-using GameClient.SExpression;
 using OMetaSharp;
 
-namespace SExpression.GeneratedCode
+namespace GameClient.SExpressionTree.GeneratedCode
 {
     public class SExpressionParser : Parser
     {
@@ -44,7 +43,7 @@ namespace SExpression.GeneratedCode
                                 (")").AsHostExpressionList()))
                             return MetaRules.Fail(out result2, out modifiedStream2);
                         result2 =
-                            (new SProgram(id.As<SId>(), e.As<GameClient.SExpression.SExpression>()))
+                            (new SProgram(id.As<SId>(), e.As<SExpression>()))
                                 .AsHostExpressionList();
                         return MetaRules.Success();
                     }, modifiedStream, out result, out modifiedStream))
@@ -318,7 +317,7 @@ namespace SExpression.GeneratedCode
                             return MetaRules.Fail(out result2, out modifiedStream2);
                         e = result2;
                         result2 =
-                            (new SOp1Expression(op.ToString(), e.As<GameClient.SExpression.SExpression>()))
+                            (new SOp1Expression(op.ToString(), e.As<SExpression>()))
                                 .AsHostExpressionList();
                         return MetaRules.Success();
                     }, modifiedStream, out result, out modifiedStream))
@@ -349,8 +348,8 @@ namespace SExpression.GeneratedCode
                             return MetaRules.Fail(out result2, out modifiedStream2);
                         e2 = result2;
                         result2 =
-                            (new SOp2Expression(op.ToString(), e1.As<GameClient.SExpression.SExpression>(),
-                                e2.As<GameClient.SExpression.SExpression>())).AsHostExpressionList();
+                            (new SOp2Expression(op.ToString(), e1.As<SExpression>(),
+                                e2.As<SExpression>())).AsHostExpressionList();
                         return MetaRules.Success();
                     }, modifiedStream, out result, out modifiedStream))
                 return MetaRules.Fail(out result, out modifiedStream);
@@ -384,8 +383,8 @@ namespace SExpression.GeneratedCode
                             return MetaRules.Fail(out result2, out modifiedStream2);
                         e3 = result2;
                         result2 =
-                            (new SIf0Expression(e1.As<GameClient.SExpression.SExpression>(),
-                                e2.As<GameClient.SExpression.SExpression>(), e3.As<GameClient.SExpression.SExpression>()))
+                            (new SIf0Expression(e1.As<SExpression>(),
+                                e2.As<SExpression>(), e3.As<SExpression>()))
                                 .AsHostExpressionList();
                         return MetaRules.Success();
                     }, modifiedStream, out result, out modifiedStream))
@@ -448,9 +447,9 @@ namespace SExpression.GeneratedCode
                                 (")").AsHostExpressionList()))
                             return MetaRules.Fail(out result2, out modifiedStream2);
                         result2 =
-                            (new SFoldExpression(e1.As<GameClient.SExpression.SExpression>(),
-                                e2.As<GameClient.SExpression.SExpression>(), id1.As<SId>(), id2.As<SId>(),
-                                e3.As<GameClient.SExpression.SExpression>())).AsHostExpressionList();
+                            (new SFoldExpression(e1.As<SExpression>(),
+                                e2.As<SExpression>(), id1.As<SId>(), id2.As<SId>(),
+                                e3.As<SExpression>())).AsHostExpressionList();
                         return MetaRules.Success();
                     }, modifiedStream, out result, out modifiedStream))
                 return MetaRules.Fail(out result, out modifiedStream);

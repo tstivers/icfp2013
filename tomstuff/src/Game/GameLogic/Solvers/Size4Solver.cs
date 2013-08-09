@@ -1,6 +1,8 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Reflection;
 using GameClient.Services;
+using GameClient.SExpressionTree;
 using GameClient.ViewModels;
 using log4net;
 
@@ -16,7 +18,26 @@ namespace GameClient.Solvers
 
         public override bool CanSolve(Problem p)
         {
-            return p.Size == 4 && !p.Operators.Contains("fold");
+            var cansolve = p.Size == 4 && !p.Operators.Contains("fold");
+
+            SProgram program = null;
+            if (p.Challenge != null)
+            {
+                try
+                {
+                    program = SProgramParser.Parse(p.Challenge);
+                }
+                catch (Exception)
+                {
+                    Debugger.Break();
+                    cansolve = false;
+                }
+            }
+
+            if (cansolve)
+                Log.InfoFormat("Size4Solver thinks it can solve {0}", program != null ? program.ToString() : p.Id);
+
+            return cansolve;
         }
 
         public override bool Solve(Problem p)

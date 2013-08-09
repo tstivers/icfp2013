@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GameClient.SExpression
+namespace GameClient.SExpressionTree
 {
     public class SIf0Expression : SExpression
     {
@@ -19,6 +19,8 @@ namespace GameClient.SExpression
         {
             return String.Format("(if0 {0} {1} {2})", Expression1, Expression2, Expression3);
         }
+
+        public override int Size { get { return 1 + Expression1.Size + Expression2.Size + Expression3.Size; } }
 
         public override ulong Eval(EvalContext context)
         {

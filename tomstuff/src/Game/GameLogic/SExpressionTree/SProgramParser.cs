@@ -1,8 +1,8 @@
 ﻿using System;
+using GameClient.SExpressionTree.GeneratedCode;
 using OMetaSharp;
-using SExpression.GeneratedCode;
 
-namespace GameClient.SExpression
+namespace GameClient.SExpressionTree
 {
     public class SProgramParser
     {

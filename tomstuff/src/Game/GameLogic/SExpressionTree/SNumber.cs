@@ -1,4 +1,4 @@
-﻿namespace GameClient.SExpression
+﻿namespace GameClient.SExpressionTree
 {
     public class SNumber : SExpression
     {
@@ -20,6 +20,8 @@
         {
             return Number.ToString();
         }
+
+        public override int Size { get { return 1; } }
 
         public override ulong Eval(EvalContext context)
         {
