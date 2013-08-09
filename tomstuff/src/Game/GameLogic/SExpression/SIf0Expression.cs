@@ -22,7 +22,9 @@ namespace GameClient.SExpression
 
         public override ulong Eval(EvalContext context)
         {
-            throw new NotImplementedException();
+            var condition = Expression1.Eval(context);
+
+            return condition == 0 ? Expression2.Eval(context) : Expression3.Eval(context);
         }
     }
 }
