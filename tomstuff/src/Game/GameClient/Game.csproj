@@ -48,19 +48,23 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\SimpleController.cs" />
+    <Compile Include="Extensions\RestClientExtensions.cs" />
+    <Compile Include="Models\ProblemContext.cs" />
     <Compile Include="Services\GameClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Solvers\SolverBase.cs" />
     <Compile Include="Solvers\StupidSolver.cs" />
+    <Compile Include="ViewModels\EvalRequest.cs" />
+    <Compile Include="ViewModels\EvalResponse.cs" />
+    <Compile Include="ViewModels\GuessRequest.cs" />
+    <Compile Include="ViewModels\GuessResponse.cs" />
     <Compile Include="ViewModels\Problem.cs" />
     <Compile Include="ViewModels\TrainRequest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Models\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

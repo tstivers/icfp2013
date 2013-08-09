@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Diagnostics;
 using GameClient.Services;
 using GameClient.ViewModels;
 
@@ -15,12 +12,36 @@ namespace GameClient.Solvers
 
         public override bool CanSolve(Problem p)
         {
-            throw new NotImplementedException();
+            return p.Size == 3;
         }
 
-        public override void Solve(Problem p)
+        public override bool Solve(Problem p)
         {
-            throw new NotImplementedException();
+            var inputs = new ulong[] {0x0000000000000000, // if NOT will end up 0xFFFFFFFFFFFFFFFFFFFFFFFFF
+                0x0000000000000001, // if shl1 will end up 0x0000000000000002, shr1 will end up 0
+                0xFF00000000000000 //
+            };
+
+            ulong[] outputs = _client.Eval(p.Id, "(lambda (x) x)", inputs);
+
+            if (outputs[0] == 0xFFFFFFFFFFFFFFFF)
+                return _client.Guess(p.Id, "(lambda (x) (not x))");
+
+            if (outputs[1] == 0x0000000000000002)
+                return _client.Guess(p.Id, "(lambda (x) (shl1 x))");
+
+            if (outputs[2] == 0x0ff0000000000000)
+                return _client.Guess(p.Id, "(lambda (x) (shr4 x))");
+
+            if (outputs[2] == 0x0000ff0000000000)
+                return _client.Guess(p.Id, "(lambda (x) (shr16 x))");
+
+            if (outputs[1] == 0x0000000000000000)
+                return _client.Guess(p.Id, "(lambda (x) (shr1 x))");
+
+            Debugger.Break();
+
+            return false;
         }
     }
 }

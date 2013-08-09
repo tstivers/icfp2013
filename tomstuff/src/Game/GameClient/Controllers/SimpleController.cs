@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using GameClient.Services;
+using GameClient.Solvers;
 using GameClient.ViewModels;
 
 namespace GameClient.Controllers
@@ -16,9 +17,16 @@ namespace GameClient.Controllers
 
         public void Train(int size, TrainingOperators operators)
         {
-            var problem = _client.GetTrainingProblem(size, operators);
+            while (true)
+            {
+                Problem problem = _client.GetTrainingProblem(size, operators);
 
-            Debugger.Break();
+                var solver = new StupidSolver(_client);
+
+                solver.Solve(problem);
+
+                Debugger.Break();
+            }
         }
 
         public void Guess()

@@ -5,7 +5,7 @@ namespace GameClient.Solvers
 {
     public abstract class SolverBase
     {
-        private IGameClient _client;
+        protected IGameClient _client;
 
         public SolverBase(IGameClient client)
         {
@@ -14,6 +14,6 @@ namespace GameClient.Solvers
 
         public abstract bool CanSolve(Problem p);
 
-        public abstract void Solve(Problem p);
+        public abstract bool Solve(Problem p);
     }
 }
