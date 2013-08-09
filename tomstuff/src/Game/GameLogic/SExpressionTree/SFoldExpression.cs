@@ -6,11 +6,12 @@ namespace GameClient.SExpressionTree
     {
         public SExpression Expression1 { get; set; }
         public SExpression Expression2 { get; set; }
-        public SId Id1 { get; set; }
-        public SId Id2 { get; set; }
+        public SIdExpression Id1 { get; set; }
+        public SIdExpression Id2 { get; set; }
         public SExpression Expression3 { get; set; }
+        public override int Size { get { return 2 + Expression1.Size + Expression2.Size + Expression3.Size; } }
 
-        public SFoldExpression(SExpression expression1, SExpression expression2, SId id1, SId id2,
+        public SFoldExpression(SExpression expression1, SExpression expression2, SIdExpression id1, SIdExpression id2,
             SExpression expression3)
         {
             Expression1 = expression1;
@@ -25,8 +26,6 @@ namespace GameClient.SExpressionTree
             return String.Format("(fold {0} {1} (lambda ({2} {3}) {4}))", Expression1, Expression2, Id1, Id2,
                 Expression3);
         }
-
-        public override int Size { get { return 2 + Expression1.Size + Expression2.Size + Expression3.Size; } }
 
         public override ulong Eval(EvalContext context)
         {

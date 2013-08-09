@@ -2,7 +2,7 @@
 
 namespace GameClient.SExpressionTree
 {
-    public class EvalContext : Dictionary<SId, SExpression>
+    public class EvalContext : Dictionary<SIdExpression, SExpression>
     {
         public EvalContext()
         {

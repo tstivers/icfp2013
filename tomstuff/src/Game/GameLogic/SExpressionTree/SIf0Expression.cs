@@ -7,6 +7,7 @@ namespace GameClient.SExpressionTree
         public SExpression Expression1 { get; set; }
         public SExpression Expression2 { get; set; }
         public SExpression Expression3 { get; set; }
+        public override int Size { get { return 1 + Expression1.Size + Expression2.Size + Expression3.Size; } }
 
         public SIf0Expression(SExpression expression1, SExpression expression2, SExpression expression3)
         {
@@ -19,8 +20,6 @@ namespace GameClient.SExpressionTree
         {
             return String.Format("(if0 {0} {1} {2})", Expression1, Expression2, Expression3);
         }
-
-        public override int Size { get { return 1 + Expression1.Size + Expression2.Size + Expression3.Size; } }
 
         public override ulong Eval(EvalContext context)
         {

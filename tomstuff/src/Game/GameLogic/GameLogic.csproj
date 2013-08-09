@@ -79,7 +79,7 @@
     <Compile Include="SExpressionTree\GeneratedCode\SExpressionParser.cs" />
     <Compile Include="SExpressionTree\SExpression.cs" />
     <Compile Include="SExpressionTree\SFoldExpression.cs" />
-    <Compile Include="SExpressionTree\SId.cs" />
+    <Compile Include="SExpressionTree\SIdExpression.cs" />
     <Compile Include="SExpressionTree\SIf0Expression.cs" />
     <Compile Include="SExpressionTree\SNumber.cs" />
     <Compile Include="SExpressionTree\SOp1Expression.cs" />
@@ -87,7 +87,7 @@
     <Compile Include="SExpressionTree\SProgram.cs" />
     <Compile Include="SExpressionTree\SProgramGenerator.cs" />
     <Compile Include="SExpressionTree\SProgramParser.cs" />
-    <Compile Include="Solvers\Size4Solver.cs" />
+    <Compile Include="Solvers\BruteForceSolver.cs" />
     <Compile Include="Solvers\SolverBase.cs" />
     <Compile Include="Solvers\Size3Solver.cs" />
     <Compile Include="ViewModels\EvalRequest.cs" />

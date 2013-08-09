@@ -47,7 +47,7 @@ namespace GameClient.Services
 
             request.AddParameter("auth", AuthToken, ParameterType.UrlSegment);
 
-            IRestResponse<List<Problem>> response = _client.GameExecute<List<Problem>>(request);
+            var response = _client.GameExecute<List<Problem>>(request);
 
             return response.Data;
         }
@@ -74,7 +74,7 @@ namespace GameClient.Services
             request.AddParameter("auth", AuthToken, ParameterType.UrlSegment);
             request.AddBody(trainRequest);
 
-            IRestResponse<Problem> response = _client.GameExecute<Problem>(request);
+            var response = _client.GameExecute<Problem>(request);
 
             return response.Data;
         }
@@ -94,9 +94,9 @@ namespace GameClient.Services
             request.AddParameter("auth", AuthToken, ParameterType.UrlSegment);
             request.AddBody(evalRequest);
 
-            IRestResponse<EvalResponse> response = _client.GameExecute<EvalResponse>(request);
+            var response = _client.GameExecute<EvalResponse>(request);
 
-            EvalResponse evalResponse = response.Data;
+            var evalResponse = response.Data;
 
             if (evalResponse.Status != "ok")
                 throw new Exception(evalResponse.Message);
@@ -114,9 +114,9 @@ namespace GameClient.Services
             request.AddParameter("auth", AuthToken, ParameterType.UrlSegment);
             request.AddBody(guessRequest);
 
-            IRestResponse<GuessResponse> response = _client.GameExecute<GuessResponse>(request);
+            var response = _client.GameExecute<GuessResponse>(request);
 
-            GuessResponse guessResponse = response.Data;
+            var guessResponse = response.Data;
 
             if (guessResponse.Status == "error")
                 throw new Exception(guessResponse.Message);

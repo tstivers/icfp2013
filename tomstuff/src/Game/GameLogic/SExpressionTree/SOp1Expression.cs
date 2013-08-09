@@ -15,6 +15,7 @@ namespace GameClient.SExpressionTree
     {
         public Op1Op Op { get; set; }
         public SExpression Expression { get; set; }
+        public override int Size { get { return 1 + Expression.Size; } }
 
         public SOp1Expression(string op, SExpression expression)
         {
@@ -27,11 +28,9 @@ namespace GameClient.SExpressionTree
             return String.Format("({0} {1})", Op, Expression);
         }
 
-        public override int Size { get { return 1 + Expression.Size; } }
-
         public override ulong Eval(EvalContext context)
         {
-            ulong val = Expression.Eval(context);
+            var val = Expression.Eval(context);
 
             switch (Op)
             {

@@ -3,6 +3,7 @@
     public class SNumber : SExpression
     {
         public ulong Number { get; set; }
+        public override int Size { get { return 1; } }
 
         public SNumber(string value)
         {
@@ -20,8 +21,6 @@
         {
             return Number.ToString();
         }
-
-        public override int Size { get { return 1; } }
 
         public override ulong Eval(EvalContext context)
         {

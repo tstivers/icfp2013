@@ -3,7 +3,7 @@ using System.Collections;
 using System.Text;
 
 ometa GameClient.SExpressionTree.GeneratedCode.SExpressionParser : Parser {
-	SProgram	= "(" "lambda" "(" Id:id ")" Expression:e ")" -> { new SProgram(id.As<SId>(), e.As<SExpression>()) },				
+	SProgram	= "(" "lambda" "(" Id:id ")" Expression:e ")" -> { new SProgram(id.As<SIdExpression>(), e.As<SExpression>()) },				
 
 	Expression  =	NumberExpression 
 					| Id
@@ -12,7 +12,7 @@ ometa GameClient.SExpressionTree.GeneratedCode.SExpressionParser : Parser {
 					| "(" If0Expression:i0 ")" -> { i0 }
 					| "(" FoldExpression:fe ")" -> { fe },
 
-	Id			= Spaces Letter:l (LetterOrDigit | '_')*:v -> { new SId(l.ToString() + v.ToLiteralString()) },		
+	Id			= Spaces Letter:l (LetterOrDigit | '_')*:v -> { new SIdExpression(l.ToString() + v.ToLiteralString()) },		
 	
 	NumberExpression = ("0" | "1"):n -> { new SNumber(n.ToString()) },
 
@@ -22,7 +22,7 @@ ometa GameClient.SExpressionTree.GeneratedCode.SExpressionParser : Parser {
 
 	If0Expression = "if0" Expression:e1 Expression:e2 Expression:e3 -> { new SIf0Expression(e1.As<SExpression>(), e2.As<SExpression>(), e3.As<SExpression>()) },
 
-	FoldExpression = "fold" Expression:e1 Expression:e2 "(" "lambda" "(" Id:id1 Id:id2 ")" Expression:e3 ")" -> { new SFoldExpression(e1.As<SExpression>(), e2.As<SExpression>(), id1.As<SId>(), id2.As<SId>(), e3.As<SExpression>()) },
+	FoldExpression = "fold" Expression:e1 Expression:e2 "(" "lambda" "(" Id:id1 Id:id2 ")" Expression:e3 ")" -> { new SFoldExpression(e1.As<SExpression>(), e2.As<SExpression>(), id1.As<SIdExpression>(), id2.As<SIdExpression>(), e3.As<SExpression>()) },
 
 	Op1 = ("not" | "shl1" | "shr16" | "shr1" | "shr4"):op Spaces -> { op },
 

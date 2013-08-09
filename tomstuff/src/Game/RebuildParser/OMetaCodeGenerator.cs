@@ -7,8 +7,8 @@ namespace SExpression.Utils.RebuildParser
     {
         public static void RebuildParser()
         {
-            string contents = File.ReadAllText(@"..\..\..\GameLogic\SExpressionTree\SExpression.ometacs");
-            string result =
+            var contents = File.ReadAllText(@"..\..\..\GameLogic\SExpressionTree\SExpression.ometacs");
+            var result =
                 Grammars.ParseGrammarThenOptimizeThenTranslate<OMetaParser, OMetaOptimizer, OMetaTranslator>(contents,
                     p => p.Grammar, o => o.OptimizeGrammar, t => t.Trans);
 

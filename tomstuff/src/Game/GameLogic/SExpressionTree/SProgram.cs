@@ -4,11 +4,11 @@ namespace GameClient.SExpressionTree
 {
     public class SProgram : SExpression
     {
-        public SId Id { get; set; }
+        public SIdExpression Id { get; set; }
         public SExpression Expression { get; set; }
         public override int Size { get { return 1 + Expression.Size; } }
 
-        public SProgram(SId id, SExpression expression)
+        public SProgram(SIdExpression id, SExpression expression)
         {
             Id = id;
             Expression = expression;
@@ -17,7 +17,7 @@ namespace GameClient.SExpressionTree
         public ulong[] Eval(ulong[] input)
         {
             var output = new ulong[input.Length];
-            for (int i = 0; i < input.Length; i++)
+            for (var i = 0; i < input.Length; i++)
                 output[i] = Eval(input[i]);
 
             return output;

@@ -13,7 +13,7 @@ namespace GameClient.SExpressionTree
 
         public static void PrettyPrint(string sexpr)
         {
-            SProgram x = Parse(sexpr);
+            var x = Parse(sexpr);
 
             RecursivePrettyPrint(x, 0);
         }

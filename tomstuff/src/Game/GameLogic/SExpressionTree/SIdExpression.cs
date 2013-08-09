@@ -2,16 +2,17 @@
 
 namespace GameClient.SExpressionTree
 {
-    public class SId : SExpression
+    public class SIdExpression : SExpression
     {
         public string Id { get; set; }
+        public override int Size { get { return 1; } }
 
-        public SId(string id)
+        public SIdExpression(string id)
         {
             Id = id;
         }
 
-        protected bool Equals(SId other)
+        protected bool Equals(SIdExpression other)
         {
             return string.Equals(Id, other.Id);
         }
@@ -24,7 +25,7 @@ namespace GameClient.SExpressionTree
                 return true;
             if (obj.GetType() != GetType())
                 return false;
-            return Equals((SId) obj);
+            return Equals((SIdExpression) obj);
         }
 
         public override int GetHashCode()
@@ -36,8 +37,6 @@ namespace GameClient.SExpressionTree
         {
             return String.Format("{0}", Id);
         }
-
-        public override int Size { get { return 1; } }
 
         public override ulong Eval(EvalContext context)
         {

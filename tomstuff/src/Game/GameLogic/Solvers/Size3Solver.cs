@@ -26,7 +26,7 @@ namespace GameClient.Solvers
                 0xFF00000000000000 //
             };
 
-            ulong[] outputs = _client.Eval(p.Id, "(lambda (x) x)", inputs);
+            var outputs = _client.Eval(p.Id, "(lambda (x) x)", inputs);
 
             if (outputs[0] == 0xFFFFFFFFFFFFFFFF)
                 return _client.Guess(p.Id, "(lambda (x) (not x))");
