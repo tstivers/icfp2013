@@ -125,6 +125,7 @@ namespace GameClient.SExpressionTree
                 _noFoldCache[size] = expressions;
 
             //Debug.Assert(expressions.All(op => op.Size == size));
+            //Debug.Assert(expressions.Any());
 
             return expressions;
         }
@@ -135,6 +136,7 @@ namespace GameClient.SExpressionTree
             var ops = GenerateExpressions(size - 1, inFold).Select(e1 => new Op1Expression(opCode, e1)).ToList();
 
             //Debug.Assert(ops.All(op => op.Size == size));
+            //Debug.Assert(ops.Any());
 
             return ops;
         }
@@ -157,6 +159,7 @@ namespace GameClient.SExpressionTree
             }
 
             //Debug.Assert(ops.All(op => op.Size == size));
+            //Debug.Assert(ops.Any());
 
             return ops;
         }
@@ -175,7 +178,7 @@ namespace GameClient.SExpressionTree
 
             foreach (var e1 in e1List)
             {
-                for (var i = 1; i <= maxExpSize - e1.Size - 1; i++)
+                for (var i = 1; i <= totalExpSize - e1.Size - 1; i++)
                 {
                     e2List.AddRange(
                         GenerateExpressions(i, inFold).Select(e2 => new Tuple<IExpression, IExpression>(e1, e2)));
@@ -190,6 +193,7 @@ namespace GameClient.SExpressionTree
             }
 
             //Debug.Assert(ops.All(op => op.Size == size));
+            //Debug.Assert(ops.Any());
 
             return ops;
         }
@@ -207,7 +211,7 @@ namespace GameClient.SExpressionTree
 
             foreach (var e0 in e0List)
             {
-                for (var i = 1; i <= maxExpSize - e0.Size - 1; i++)
+                for (var i = 1; i <= totalExpSize - e0.Size - 1; i++)
                 {
                     e0e1List.AddRange(
                         GenerateExpressions(i, false).Select(e1 => new Tuple<IExpression, IExpression>(e0, e1)));
@@ -222,6 +226,7 @@ namespace GameClient.SExpressionTree
             }
 
             //Debug.Assert(ops.All(op => op.Size == size));
+            //Debug.Assert(ops.Any());
 
             return ops;
         }
