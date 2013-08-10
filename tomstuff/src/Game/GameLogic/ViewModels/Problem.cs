@@ -9,6 +9,6 @@ namespace GameClient.ViewModels
         public int Size { get; set; }
         public List<string> Operators { get; set; }
         public bool Solved { get; set; }
-        public double TimeLeft { get; set; }
+        public double? TimeLeft { get; set; }
     }
 }

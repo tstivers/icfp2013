@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using log4net;
@@ -13,6 +15,11 @@ namespace GameClient.SExpressionTree
         private readonly string[][] opPool;
         public int Size { get; set; }
         public string[] Operators { get; set; }
+
+        private readonly ConcurrentDictionary<int, List<SExpression>> _expressionCache = new ConcurrentDictionary<int, List<SExpression>>();
+        private readonly ConcurrentDictionary<Tuple<int, string>, List<SOp1Expression>> _op1ExpressionCache = new ConcurrentDictionary<Tuple<int, String>, List<SOp1Expression>>();
+        private readonly ConcurrentDictionary<Tuple<int, String>, List<SOp2Expression>> _op2ExpressionCache = new ConcurrentDictionary<Tuple<int, String>, List<SOp2Expression>>();
+        private readonly ConcurrentDictionary<int, List<SIf0Expression>> _if0ExpressionCache = new ConcurrentDictionary<int, List<SIf0Expression>>();
 
         public SProgramGenerator(int size, string[] operators)
         {
@@ -31,7 +38,11 @@ namespace GameClient.SExpressionTree
         {
             Log.InfoFormat("Generating all programs of size {0} using operators {1}", Size,
                 String.Join(",", Operators.Select(x => "\"" + x + "\"")));
-            return GenerateExpressions(Size - 1).Where(x =>
+
+            var sw = new Stopwatch();
+            sw.Start();
+
+            var results = GenerateExpressions(Size - 1).Where(x =>
             {
                 var p = x.ToString();
                 foreach (var op in Operators)
@@ -45,10 +56,23 @@ namespace GameClient.SExpressionTree
 
                 return true;
             }).Select(x => new SProgram(new SIdExpression(OPNAME), x));
+
+            sw.Stop();
+
+            Log.InfoFormat("Generated {0} programs in {1:c}", results.Count(), sw.Elapsed);
+
+            return results;
         }
 
         private IEnumerable<SExpression> GenerateExpressions(int size)
         {
+            List<SExpression> cached;
+            if (_expressionCache.TryGetValue(size, out cached))
+                return cached;
+
+            if (_expressionCache.ContainsKey(size))
+                return _expressionCache[size];
+
             var expressions = new List<SExpression>();
 
             if (size == 1)
@@ -72,26 +96,44 @@ namespace GameClient.SExpressionTree
                     expressions.AddRange(GenerateIf0Expressions(size - 1));
             }
 
+            _expressionCache[size] = expressions;
             return expressions;
         }
 
         private IEnumerable<SOp1Expression> GenerateOp1Expressions(string op, int size)
         {
-            return GenerateExpressions(size).Select(x => new SOp1Expression(op, x));
+            List<SOp1Expression> cached;
+            if (_op1ExpressionCache.TryGetValue(new Tuple<int, string>(size, op), out cached))
+                return cached;
+
+            if (_op1ExpressionCache.ContainsKey(new Tuple<int, string>(size, op)))
+                return _op1ExpressionCache[new Tuple<int, string>(size, op)];
+
+
+            var results = GenerateExpressions(size).Select(x => new SOp1Expression(op, x));
+            _op1ExpressionCache[new Tuple<int, string>(size, op)] = results.ToList();
+
+            return results;
         }
 
         private IEnumerable<SOp2Expression> GenerateOp2Expressions(string op, int size)
         {
+            List<SOp2Expression> cached;
+            if (_op2ExpressionCache.TryGetValue(new Tuple<int, string>(size, op), out cached))
+                return cached;
+
             var e1 = new List<SExpression>();
-            var o = new List<SOp2Expression>();
+            var results = new List<SOp2Expression>();
 
             for (var i = 1; i < size; i++)
                 e1.AddRange(GenerateExpressions(i));
 
             foreach (var exp in e1)
-                o.AddRange(GenerateExpressions(size - exp.Size).Select(x => new SOp2Expression(op, exp, x)));
+                results.AddRange(GenerateExpressions(size - exp.Size).Select(x => new SOp2Expression(op, exp, x)));
 
-            return o;
+            _op2ExpressionCache[new Tuple<int, string>(size, op)] = results.ToList();
+
+            return results;
         }
 
         private IEnumerable<SIf0Expression> GenerateIf0Expressions(int size)
@@ -105,8 +147,9 @@ namespace GameClient.SExpressionTree
 
             foreach (var exp in e1)
             {
-                e2.AddRange(GenerateExpressions(size - exp.Size - 1)
-                    .Select(x => new Tuple<SExpression, SExpression>(exp, x)));
+                for (var i = 1; size - exp.Size - i > 0; i++)
+                    e2.AddRange(GenerateExpressions(size - exp.Size - i)
+                        .Select(x => new Tuple<SExpression, SExpression>(exp, x)));
             }
 
             foreach (var exp in e2)
@@ -120,3 +163,4 @@ namespace GameClient.SExpressionTree
         }
     }
 }
+

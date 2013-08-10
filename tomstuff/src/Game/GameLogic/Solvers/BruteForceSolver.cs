@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using GameClient.Services;
@@ -15,7 +16,7 @@ namespace GameClient.Solvers
 
         private static readonly ulong[] TestValues =
         {
-            0x0000000000000000, 0x0000000000000001, 0xFF00000000000000,
+            0x0000000000000000, 0x0000000000000001, 0xFFFFFFFFFFFFFFFF,
             0x0000000100000000, 0x1122334455667788, 0x8000000000000001
         };
 
@@ -25,13 +26,22 @@ namespace GameClient.Solvers
 
         public override bool CanSolve(Problem p)
         {
-            return p.Size <= 12 && (!p.Operators.Contains("fold") || !p.Operators.Contains("tfold"));
+            if (p.Size > 11)
+                return false;
+
+            //if (!p.Operators.Contains("if0"))
+            //    return false;
+
+            return !(p.Operators.Contains("fold") || p.Operators.Contains("tfold"));
         }
 
         public Dictionary<string, SProgram> GenerateIndex(List<ulong> inputs, IEnumerable<SProgram> programs)
         {
             var index = new Dictionary<string, SProgram>();
-            
+
+            var sw = new Stopwatch();
+            sw.Start();
+
             foreach (var program in programs)
             {
                 var results = program.Eval(inputs.ToArray());
@@ -42,6 +52,8 @@ namespace GameClient.Solvers
                 index[rs] = program;
             }
 
+            Log.DebugFormat("Generated index in {0:c}", sw.Elapsed);
+
             return index;
         }
 
@@ -49,9 +61,7 @@ namespace GameClient.Solvers
         {
 
             var generator = new SProgramGenerator(p.Size, p.Operators.ToArray());
-            var programs = generator.GeneratePrograms();
-
-            Log.InfoFormat("Generated {0} programs", programs.Count());
+            var programs = generator.GeneratePrograms();            
 
             if (!programs.Any())
             {
@@ -62,13 +72,14 @@ namespace GameClient.Solvers
             var inputs = new List<ulong>(TestValues);
             var index = GenerateIndex(inputs, programs);
             var outputs = _client.Eval(p.Id, "(lambda (x) x)", TestValues);
-            var os = String.Join(", ", outputs.Select(x => "0x" + x.ToString("X")));                  
+            var os = String.Join(", ", outputs.Select(x => "0x" + x.ToString("X")));         
+            //Log.DebugFormat("Got output string: {0}", os);
 
             while (true)
             {
                 if (!index.ContainsKey(os))
                 {
-                    Log.ErrorFormat("Failed to find solution for problem {0}", p.Challenge ?? p.Id);
+                    Log.ErrorFormat("Failed to find solution for problem {0}", p.Id);
                     return false;
                 }
 
@@ -76,12 +87,14 @@ namespace GameClient.Solvers
 
                 if (!result.IsCorrect)
                 {
-                    Log.WarnFormat("Made incorrect guess for problem {0}: {1}", p.Challenge ?? p.Id, index[os]);
-                    Log.InfoFormat("Adding value {0}: got {1} expected {2}", result.Values[0], result.Values[1], result.Values[2]);
+                    Log.WarnFormat("Made incorrect guess for problem {0}: {1}", p.Id, index[os]);
+                    Log.InfoFormat("Adding value {0}: theirs {1} mine {2}", result.Values[0], result.Values[1], result.Values[2]);
                     var newTestVal = Convert.ToUInt64(result.Values[0], 16);
+                    var newTestSol = Convert.ToUInt64(result.Values[1], 16);
                     inputs.Add(newTestVal);
                     index = GenerateIndex(inputs, programs);
-                    os = String.Format("{0}, {1}", os, "0x" + newTestVal.ToString("X"));                    
+                    os = String.Format("{0}, {1}", os, "0x" + newTestSol.ToString("X"));         
+                    Log.DebugFormat("new solution target: {0}", os);                    
                 }
                 else
                 {
@@ -89,7 +102,7 @@ namespace GameClient.Solvers
                 }
             }
 
-            Log.InfoFormat("Correctly guessed problem {0}: {1}", p.Challenge ?? p.Id, index[os]);
+            Log.InfoFormat("Correctly guessed problem {0}: {1}", p.Id, index[os]);
 
             return true;
         }

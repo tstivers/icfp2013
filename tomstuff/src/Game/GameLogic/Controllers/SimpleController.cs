@@ -1,7 +1,9 @@
-﻿using System.Reflection;
+﻿using System.Collections.Generic;
+using System.Reflection;
 using GameClient.Services;
 using GameClient.SExpressionTree;
 using GameClient.Solvers;
+using GameClient.ViewModels;
 using log4net;
 
 namespace GameClient.Controllers
@@ -31,6 +33,25 @@ namespace GameClient.Controllers
             }
         }
 
+        public void Train(string id)
+        {
+            var problem = new Problem()
+            {
+                Challenge = "(lambda (y) (if0 (and (shr1 y) y) 1 (shr4 (shr1 y))))",
+                Id = id,
+                Size = 10,
+                Operators = new List<string> { "and", "if0", "shr1", "shr4" }
+            };
+
+            Log.InfoFormat("Got training program: {0}", SProgramParser.Parse(problem.Challenge));
+
+            foreach (var solver in _solvers)
+            {
+                if (solver.CanSolve(problem))
+                    solver.Solve(problem);
+            }
+        }
+
         public void Guess()
         {
             var problems = _client.GetProblems();
@@ -39,6 +60,12 @@ namespace GameClient.Controllers
             {
                 if (problem.Solved)
                     continue;
+
+                if (problem.TimeLeft.HasValue && problem.TimeLeft == 0.0)
+                {
+                    Log.WarnFormat("Skipping expired problem {0}", problem.Id);
+                    continue;
+                }
 
                 foreach (var solver in _solvers)
                 {

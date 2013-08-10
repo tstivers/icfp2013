@@ -28,8 +28,8 @@ namespace GameConsole
 
             while (true)
             {
-                controller.Train(9);
-                Console.ReadKey();
+                controller.Train(11);
+                //    //Console.ReadKey();
             }
 
             //controller.Guess();

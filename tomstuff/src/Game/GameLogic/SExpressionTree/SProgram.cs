@@ -23,7 +23,7 @@ namespace GameClient.SExpressionTree
             return output;
         }
 
-        private ulong Eval(ulong input)
+        public ulong Eval(ulong input)
         {
             var context = new EvalContext();
 
