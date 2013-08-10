@@ -4,24 +4,24 @@ namespace GameClient.SExpressionTree
 {
     public class Op1Expression : IExpression
     {
-        public string Op { get; set; }
-        public IExpression Expression { get; set; }
+        private readonly IExpression _e0;
+        private readonly string _opCode;
 
-        public Op1Expression(string op, IExpression expression)
+        public Op1Expression(string opCode, IExpression e0)
         {
-            Op = op;
-            Expression = expression;
+            _opCode = opCode;
+            _e0 = e0;
         }
 
         #region IExpression Members
 
-        public int Size { get { return 1 + Expression.Size; } }
+        public int Size { get { return 1 + _e0.Size; } }
 
         public ulong Eval(EvalContext context)
         {
-            var val = Expression.Eval(context);
+            var val = _e0.Eval(context);
 
-            switch (Op)
+            switch (_opCode)
             {
                 case "not":
                     return ~val;
@@ -35,14 +35,14 @@ namespace GameClient.SExpressionTree
                     return val >> 16;
             }
 
-            throw new NotImplementedException(String.Format("Operation {0} is not implemented", Op));
+            throw new NotImplementedException(String.Format("Operation {0} is not implemented", _opCode));
         }
 
         #endregion
 
         public override string ToString()
         {
-            return String.Format("({0} {1})", Op, Expression);
+            return String.Format("({0} {1})", _opCode, _e0);
         }
     }
 }

@@ -28,13 +28,13 @@ namespace GameClient.Solvers
 
         public override bool CanSolve(Problem p)
         {
-            //if (p.Size > 12)
-            //    return false;
+            if (p.Size > 12)
+                return false;
 
-            //if (!p.Operators.Contains("if0"))
-            //    return false;
+            if (p.Size == 12 && p.Operators.Count() > 5)
+                return false;
 
-            return !(p.Operators.Contains("fold") || p.Operators.Contains("tfold"));
+            return true;
         }
 
         public ConcurrentDictionary<string, ProgramExpression> GenerateIndex(List<ulong> inputs,

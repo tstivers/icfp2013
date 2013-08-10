@@ -21,7 +21,7 @@ namespace GameConsole
             var controller = new SimpleController(client);
 
             while (!Console.KeyAvailable)
-                controller.Train(12);
+                controller.Train(11);
 
             //controller.Guess();
 

@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using log4net;
 
 namespace GameClient.SExpressionTree
@@ -13,25 +12,27 @@ namespace GameClient.SExpressionTree
     {
         private const string OpName = "y";
 
-        private static readonly List<IExpression> Numbers = new List<IExpression>
+        private static readonly IdExpression YExpression = new IdExpression("y");
+        private static readonly IdExpression F1Expression = new IdExpression("f1");
+        private static readonly IdExpression F2Expression = new IdExpression("f2");
+
+        private static readonly List<IExpression> NoFoldIds = new List<IExpression>
         {
             new NumberExpression(0),
-            new NumberExpression(1)
+            new NumberExpression(1),
+            YExpression
         };
+
+        private static readonly List<IExpression> FoldIds =
+            new[] {F1Expression, F2Expression}.Concat(NoFoldIds).ToList();
 
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-        private readonly ConcurrentDictionary<Tuple<int, List<IdExpression>>, List<IExpression>> _expressionCache =
-            new ConcurrentDictionary<Tuple<int, List<IdExpression>>, List<IExpression>>();
+        private readonly ConcurrentDictionary<int, List<IExpression>> _foldCache =
+            new ConcurrentDictionary<int, List<IExpression>>();
 
-        private readonly ConcurrentDictionary<Tuple<int, List<IdExpression>>, List<If0Expression>> _if0ExpressionCache =
-            new ConcurrentDictionary<Tuple<int, List<IdExpression>>, List<If0Expression>>();
-
-        private readonly ConcurrentDictionary<Tuple<int, List<IdExpression>, string>, List<Op1Expression>> _op1ExpressionCache =
-            new ConcurrentDictionary<Tuple<int, List<IdExpression>, string>, List<Op1Expression>>();
-
-        private readonly ConcurrentDictionary<Tuple<int, List<IdExpression>, String>, List<Op2Expression>> _op2ExpressionCache =
-            new ConcurrentDictionary<Tuple<int, List<IdExpression>, String>, List<Op2Expression>>();
+        private readonly ConcurrentDictionary<int, List<IExpression>> _noFoldCache =
+            new ConcurrentDictionary<int, List<IExpression>>();
 
         private readonly string[][] _opPool;
         public int Size { get; set; }
@@ -40,7 +41,7 @@ namespace GameClient.SExpressionTree
         public SProgramGenerator(int size, string[] operators)
         {
             Size = size;
-            Operators = operators.Where(x => x != "bonus").ToArray();
+            Operators = operators.Where(x => x != "bonus").Select(x => x.Replace("tfold", "fold")).ToArray();
 
             _opPool = new string[6][];
             _opPool[1] = new[] {"0", "1"};
@@ -55,180 +56,174 @@ namespace GameClient.SExpressionTree
             Log.InfoFormat("Generating all programs of size {0} using operators {1}", Size,
                 String.Join(",", Operators.Select(x => "\"" + x + "\"")));
 
-            var vars = new List<IdExpression> {new IdExpression(OpName)};
+            _noFoldCache[1] = NoFoldIds;
+            _foldCache[1] = FoldIds;
+
+            var id = new IdExpression(OpName);
 
             var sw = new Stopwatch();
             sw.Start();
 
-            var results = GenerateExpressions(Size - 1, vars).Where(x =>
+            for (var i = 2; i < Size; i++)
+                GenerateExpressions(i, false);
+
+            var results = _noFoldCache[Size - 1].Where(expression =>
             {
-                var p = x.ToString();
-                return Operators.All(p.Contains) && p.Contains(OpName);
-            }).Select(x => new ProgramExpression(new IdExpression(OpName), x)).ToList();
+                var expressionText = expression.ToString();
+                return Operators.All(expressionText.Contains) && expressionText.Contains(OpName);
+            }).Select(e0 => new ProgramExpression(id, e0)).ToList();
 
             Log.InfoFormat("Generated {0} programs in {1:c}", results.Count(), sw.Elapsed);
 
             return results;
         }
 
-        private List<IExpression> GenerateExpressions(int size, List<IdExpression> vars)
+        private List<IExpression> GenerateExpressions(int size, bool inFold)
         {
-            List<IExpression> cached;
-            if (_expressionCache.TryGetValue(new Tuple<int, List<IdExpression>>(size, vars), out cached))
-                return cached;          
+            if (size == 0)
+                throw new ArgumentException("Attempted to generate size 0 expressions");
 
-            var expressions = new List<IExpression>();
+            List<IExpression> expressions;
 
-            if (size == 1)
-                return Numbers.Concat(vars).ToList();
+            if (!inFold && _noFoldCache.TryGetValue(size, out expressions))
+                return expressions;
+
+            if (inFold && _foldCache.TryGetValue(size, out expressions))
+                return expressions;
+
+            expressions = new List<IExpression>();
+
+            //Log.DebugFormat("Generating expressions of size {0}", size);
 
             if (size >= 2)
-            {                
-                Parallel.ForEach(_opPool[2], op1 =>
-                {
-                    var ops = GenerateOp1Expressions(op1, size - 1, vars);
-                    lock (expressions)
-                    {
-                        expressions.AddRange(ops);
-                    }
-                });
+            {
+                foreach (var opCode in _opPool[2])
+                    expressions.AddRange(GenerateOp1Expressions(opCode, size, inFold));
             }
 
             if (size >= 3)
             {
-                Parallel.ForEach(_opPool[3], op2 =>
-                {
-                    var ops = GenerateOp2Expressions(op2, size - 1, vars);
-                    lock (expressions)
-                    {
-                        expressions.AddRange(ops);
-                    }
-                });
+                foreach (var opCode in _opPool[3])
+                    expressions.AddRange(GenerateOp2Expressions(opCode, size, inFold));
             }
 
             if (size >= 4)
             {
-                if(_opPool[4].Length != 0)
-                    expressions.AddRange(GenerateIf0Expressions(size - 1, vars));
+                if (_opPool[4].Length != 0)
+                    expressions.AddRange(GenerateIf0Expressions(size, inFold));
             }
 
-            if (size >= 5)
+            if (size >= 5 && !inFold)
             {
+                if (_opPool[5].Length != 0)
+                    expressions.AddRange(GenerateFoldExpressions(size));
             }
 
-            _expressionCache[new Tuple<int, List<IdExpression>>(size, vars)] = expressions;
+            if (inFold)
+                _foldCache[size] = expressions;
+            else
+                _noFoldCache[size] = expressions;
+
+            //Debug.Assert(expressions.All(op => op.Size == size));
+
             return expressions;
         }
 
-        private List<Op1Expression> GenerateOp1Expressions(string op, int size, List<IdExpression> vars)
+        private List<Op1Expression> GenerateOp1Expressions(string opCode, int size, bool inFold)
         {
-            List<Op1Expression> cached;
-            if (_op1ExpressionCache.TryGetValue(new Tuple<int, List<IdExpression>, string>(size, vars, op), out cached))
-                return cached;
+            //Log.DebugFormat("Generating op1 expressions of size {0}", size);
+            var ops = GenerateExpressions(size - 1, inFold).Select(e1 => new Op1Expression(opCode, e1)).ToList();
 
-            var results = GenerateExpressions(size, vars).Select(x => new Op1Expression(op, x)).ToList();
-            _op1ExpressionCache[new Tuple<int, List<IdExpression>, string>(size, vars, op)] = results;
+            //Debug.Assert(ops.All(op => op.Size == size));
 
-            return results;
+            return ops;
         }
 
-        private List<Op2Expression> GenerateOp2Expressions(string op, int size, List<IdExpression> vars)
+        private List<Op2Expression> GenerateOp2Expressions(string opCode, int size, bool inFold)
         {
-            List<Op2Expression> cached;
-            if (_op2ExpressionCache.TryGetValue(new Tuple<int, List<IdExpression>, string>(size, vars, op), out cached))
-                return cached;
+            //Log.DebugFormat("Generating op2 expressions of size {0}", size);
+            var e1List = new List<IExpression>();
+            var ops = new List<Op2Expression>();
+            var maxExpSize = size - 2;
+            var totalExpSize = size - 1;
 
-            var e1 = new List<IExpression>();
-            var results = new List<Op2Expression>();
+            for (var i = 1; i <= maxExpSize; i++)
+                e1List.AddRange(GenerateExpressions(i, inFold));
 
-            Parallel.For(1, size - 1, i =>
+            foreach (var e1 in e1List)
             {
-                var expressions = GenerateExpressions(i, vars);
-                lock (e1)
-                    e1.AddRange(expressions);
-            });
+                ops.AddRange(
+                    GenerateExpressions(totalExpSize - e1.Size, inFold).Select(e2 => new Op2Expression(opCode, e1, e2)));
+            }
 
-            //for (var i = 1; i < size; i++)
-            //    e1.AddRange(GenerateExpressions(i, vars));
+            //Debug.Assert(ops.All(op => op.Size == size));
 
-            foreach (var exp in e1)
-                results.AddRange(GenerateExpressions(size - exp.Size, vars).Select(x => new Op2Expression(op, exp, x)));
-
-            _op2ExpressionCache[new Tuple<int, List<IdExpression>, string>(size, vars, op)] = results;
-
-            return results;
+            return ops;
         }
 
-        private List<If0Expression> GenerateIf0Expressions(int size, List<IdExpression> vars)
+        private List<If0Expression> GenerateIf0Expressions(int size, bool inFold)
         {
-            List<If0Expression> cached;
-            if (_if0ExpressionCache.TryGetValue(new Tuple<int, List<IdExpression>>(size, vars), out cached))
-                return cached;
+            //Log.DebugFormat("Generating if0 expressions of size {0}", size);
+            var e1List = new List<IExpression>();
+            var e2List = new List<Tuple<IExpression, IExpression>>();
+            var ops = new List<If0Expression>();
+            var maxExpSize = size - 3;
+            var totalExpSize = size - 1;
 
-            var e1 = new List<IExpression>();
-            var e2 = new List<Tuple<IExpression, IExpression>>();
-            var o = new List<If0Expression>();
+            for (var i = 1; i <= maxExpSize; i++)
+                e1List.AddRange(GenerateExpressions(i, inFold));
 
-            Parallel.For(1, size - 1, i =>
+            foreach (var e1 in e1List)
             {
-                var expressions = GenerateExpressions(i, vars);
-                lock (e1)
-                    e1.AddRange(expressions);
-            });
-
-            //for (var i = 1; i < size - 1; i++)
-            //    e1.AddRange(GenerateExpressions(i, vars));
-
-            foreach (var exp in e1)
-            {
-                for (var i = 1; size - exp.Size - i > 0; i++)
+                for (var i = 1; i <= maxExpSize - e1.Size - 1; i++)
                 {
-                    e2.AddRange(
-                        GenerateExpressions(size - exp.Size - i, vars)
-                            .Select(x => new Tuple<IExpression, IExpression>(exp, x)));
+                    e2List.AddRange(
+                        GenerateExpressions(i, inFold).Select(e2 => new Tuple<IExpression, IExpression>(e1, e2)));
                 }
             }
 
-            foreach (var exp in e2)
+            foreach (var e1e2 in e2List)
             {
-                o.AddRange(
-                    GenerateExpressions(size - exp.Item1.Size - exp.Item2.Size, vars)
-                        .Select(x => new If0Expression(exp.Item1, exp.Item2, x)));
+                ops.AddRange(
+                    GenerateExpressions(totalExpSize - e1e2.Item1.Size - e1e2.Item2.Size, inFold)
+                        .Select(e3 => new If0Expression(e1e2.Item1, e1e2.Item2, e3)));
             }
 
-            _if0ExpressionCache[new Tuple<int, List<IdExpression>>(size, vars)] = o;
+            //Debug.Assert(ops.All(op => op.Size == size));
 
-            return o;
+            return ops;
         }
 
-        private List<FoldExpression> GenerateFoldExpressions(int size, List<IdExpression> vars)
-        {         
-            var e0 = new List<IExpression>();
-            var e1 = new List<Tuple<IExpression, IExpression>>();
-            var expressions = new List<FoldExpression>();
+        private List<FoldExpression> GenerateFoldExpressions(int size)
+        {
+            var e0List = new List<IExpression>();
+            var e0e1List = new List<Tuple<IExpression, IExpression>>();
+            var ops = new List<FoldExpression>();
+            var maxExpSize = size - 4;
+            var totalExpSize = size - 2;
 
-            for (var i = 1; i < size - 1; i++)
-                e0.AddRange(GenerateExpressions(i, vars));
+            for (var i = 1; i <= maxExpSize; i++)
+                e0List.AddRange(GenerateExpressions(i, false));
 
-            foreach (var exp in e0)
+            foreach (var e0 in e0List)
             {
-                for (var i = 1; size - exp.Size - i > 0; i++)
+                for (var i = 1; i <= maxExpSize - e0.Size - 1; i++)
                 {
-                    e1.AddRange(
-                        GenerateExpressions(size - exp.Size - i, vars)
-                            .Select(x => new Tuple<IExpression, IExpression>(exp, x)));
+                    e0e1List.AddRange(
+                        GenerateExpressions(i, false).Select(e1 => new Tuple<IExpression, IExpression>(e0, e1)));
                 }
             }
 
-            //foreach (var exp in e1)
-            //{
-            //    expressions.AddRange(
-            //        GenerateExpressions(size - exp.Item1.Size - exp.Item2.Size, vars)
-            //            .Select(x => new If0Expression(exp.Item1, exp.Item2, x)));
-            //}
+            foreach (var e0e1 in e0e1List)
+            {
+                ops.AddRange(
+                    GenerateExpressions(totalExpSize - e0e1.Item1.Size - e0e1.Item2.Size, true)
+                        .Select(e2 => new FoldExpression(e0e1.Item1, e0e1.Item2, F1Expression, F2Expression, e2)));
+            }
 
+            //Debug.Assert(ops.All(op => op.Size == size));
 
-            return expressions;
+            return ops;
         }
     }
 }

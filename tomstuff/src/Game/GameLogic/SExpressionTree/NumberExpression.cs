@@ -2,18 +2,18 @@
 {
     public class NumberExpression : IExpression
     {
-        public ulong Number { get; set; }
+        private readonly ulong _value;
 
         public NumberExpression(string value)
         {
             ulong num;
             ulong.TryParse(value, out num);
-            Number = num;
+            _value = num;
         }
 
         public NumberExpression(ulong value)
         {
-            Number = value;
+            _value = value;
         }
 
         #region IExpression Members
@@ -22,14 +22,14 @@
 
         public ulong Eval(EvalContext context)
         {
-            return Number;
+            return _value;
         }
 
         #endregion
 
         public override string ToString()
         {
-            return Number.ToString();
+            return _value.ToString();
         }
     }
 }

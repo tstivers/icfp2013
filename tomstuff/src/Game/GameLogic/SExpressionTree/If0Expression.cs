@@ -4,33 +4,33 @@ namespace GameClient.SExpressionTree
 {
     public class If0Expression : IExpression
     {
-        public IExpression Expression1 { get; set; }
-        public IExpression Expression2 { get; set; }
-        public IExpression Expression3 { get; set; }
+        private readonly IExpression _e0;
+        private readonly IExpression _e1;
+        private readonly IExpression _e2;
 
         public If0Expression(IExpression expression1, IExpression expression2, IExpression expression3)
         {
-            Expression1 = expression1;
-            Expression2 = expression2;
-            Expression3 = expression3;
+            _e0 = expression1;
+            _e1 = expression2;
+            _e2 = expression3;
         }
 
         #region IExpression Members
 
-        public int Size { get { return 1 + Expression1.Size + Expression2.Size + Expression3.Size; } }
+        public int Size { get { return 1 + _e0.Size + _e1.Size + _e2.Size; } }
 
         public ulong Eval(EvalContext context)
         {
-            var condition = Expression1.Eval(context);
+            var condition = _e0.Eval(context);
 
-            return condition == 0 ? Expression2.Eval(context) : Expression3.Eval(context);
+            return condition == 0 ? _e1.Eval(context) : _e2.Eval(context);
         }
 
         #endregion
 
         public override string ToString()
         {
-            return String.Format("(if0 {0} {1} {2})", Expression1, Expression2, Expression3);
+            return String.Format("(if0 {0} {1} {2})", _e0, _e1, _e2);
         }
     }
 }

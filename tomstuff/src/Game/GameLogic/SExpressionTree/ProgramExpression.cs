@@ -4,22 +4,22 @@ namespace GameClient.SExpressionTree
 {
     public class ProgramExpression : IExpression
     {
-        public IdExpression Id { get; set; }
-        public IExpression Expression { get; set; }
+        private readonly IExpression _e0;
+        private readonly IdExpression _id;
 
-        public ProgramExpression(IdExpression id, IExpression expression)
+        public ProgramExpression(IdExpression id, IExpression e0)
         {
-            Id = id;
-            Expression = expression;
+            _id = id;
+            _e0 = e0;
         }
 
         #region IExpression Members
 
-        public int Size { get { return 1 + Expression.Size; } }
+        public int Size { get { return 1 + _e0.Size; } }
 
         public ulong Eval(EvalContext context)
         {
-            return Expression.Eval(context);
+            return _e0.Eval(context);
         }
 
         #endregion
@@ -37,14 +37,14 @@ namespace GameClient.SExpressionTree
         {
             var context = new EvalContext();
 
-            context[Id] = new NumberExpression(input);
+            context[_id] = new NumberExpression(input);
 
             return Eval(context);
         }
 
         public override string ToString()
         {
-            return String.Format("(lambda ({0}) {1})", Id, Expression);
+            return String.Format("(lambda ({0}) {1})", _id, _e0);
         }
     }
 }
