@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using GameClient.SExpressionTree;
-using GameClient.ViewModels;
+﻿using GameClient.SExpressionTree;
 using NUnit.Framework;
 
 namespace GameLogic.Tests
@@ -13,7 +8,7 @@ namespace GameLogic.Tests
     {
         [Test]
         public void ThisShouldWork()
-        {            
+        {
             var problem = SProgramParser.Parse("(lambda (x_9646) (if0 (and (shr1 (shr4 (shr16 x_9646))) 1) x_9646 0))");
             var solution = SProgramParser.Parse("(lambda (y) (if0 (and (shr16 (shr16 (shr4 y))) y) y 0))");
 

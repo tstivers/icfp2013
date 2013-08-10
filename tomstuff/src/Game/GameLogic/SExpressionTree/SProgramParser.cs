@@ -6,9 +6,9 @@ namespace GameClient.SExpressionTree
 {
     public class SProgramParser
     {
-        public static SProgram Parse(string sexpr)
+        public static ProgramExpression Parse(string sexpr)
         {
-            return Grammars.ParseWith<SExpressionParser>(sexpr, x => x.SProgram).As<SProgram>();
+            return Grammars.ParseWith<SExpressionParser>(sexpr, x => x.SProgram).As<ProgramExpression>();
         }
 
         public static void PrettyPrint(string sexpr)
@@ -18,7 +18,7 @@ namespace GameClient.SExpressionTree
             RecursivePrettyPrint(x, 0);
         }
 
-        private static void RecursivePrettyPrint(SProgram x, int depth)
+        private static void RecursivePrettyPrint(ProgramExpression x, int depth)
         {
             Console.Write(new String('\t', depth));
 

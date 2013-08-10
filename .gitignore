@@ -9,3 +9,5 @@ tomstuff/src/Game/GameLogic/obj/
 tomstuff/src/Game/GameLogic/bin/
 tomstuff/src/Game/GameLogic.Tests/bin/
 tomstuff/src/Game/GameLogic.Tests/obj/
+*.psess
+*.vsp

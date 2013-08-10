@@ -8,12 +8,6 @@ namespace GameClient.ViewModels
         public List<string> Values { get; set; }
         public string Message { get; set; }
 
-        public bool IsCorrect
-        {
-            get
-            {
-                return Status == "win";
-            }
-        }
+        public bool IsCorrect { get { return Status == "win"; } }
     }
 }

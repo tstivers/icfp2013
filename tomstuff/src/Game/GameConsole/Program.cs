@@ -17,20 +17,11 @@ namespace GameConsole
 
             var client = new GameClient.Services.GameClient(args[0]);
 
-            //var programs = new SProgramGenerator(10, new[] {"not", "xor", "and", "plus", "shl1", "shr16"}).GeneratePrograms();                
-
-            //Log.InfoFormat("Generated {0} programs", programs.Count());
-
-            //IEnumerable<Problem> problems = client.GetProblems();
-
             // create a solver controller
             var controller = new SimpleController(client);
 
-            while (true)
-            {
-                controller.Train(11);
-                //    //Console.ReadKey();
-            }
+            while (!Console.KeyAvailable)
+                controller.Train(12);
 
             //controller.Guess();
 

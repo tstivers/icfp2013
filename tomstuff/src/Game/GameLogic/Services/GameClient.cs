@@ -36,7 +36,9 @@ namespace GameClient.Services
             AuthToken = authToken + "vpsH1H";
             Endpoint = endpoint ?? "http://icfpc2013.cloudapp.net/";
             _client = new RestClient(Endpoint);
-        }   
+        }
+
+        #region IGameClient Members
 
         public IEnumerable<Problem> GetProblems()
         {
@@ -120,6 +122,8 @@ namespace GameClient.Services
                 throw new Exception(guessResponse.Message);
 
             return guessResponse;
-        }       
+        }
+
+        #endregion
     }
 }

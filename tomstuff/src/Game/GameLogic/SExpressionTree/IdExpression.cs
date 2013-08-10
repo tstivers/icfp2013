@@ -2,17 +2,31 @@
 
 namespace GameClient.SExpressionTree
 {
-    public class SIdExpression : SExpression
+    public class IdExpression : IExpression
     {
         public string Id { get; set; }
-        public override int Size { get { return 1; } }
 
-        public SIdExpression(string id)
+        public IdExpression(string id)
         {
             Id = id;
         }
 
-        protected bool Equals(SIdExpression other)
+        #region IExpression Members
+
+        public int Size { get { return 1; } }
+
+        public ulong Eval(EvalContext context)
+        {
+            IExpression exp;
+            if (!context.TryGetValue(this, out exp))
+                throw new ArgumentException(String.Format("Id {0} was not bound in the current context.", Id));
+
+            return exp.Eval(context);
+        }
+
+        #endregion
+
+        protected bool Equals(IdExpression other)
         {
             return string.Equals(Id, other.Id);
         }
@@ -25,7 +39,7 @@ namespace GameClient.SExpressionTree
                 return true;
             if (obj.GetType() != GetType())
                 return false;
-            return Equals((SIdExpression) obj);
+            return Equals((IdExpression) obj);
         }
 
         public override int GetHashCode()
@@ -36,11 +50,6 @@ namespace GameClient.SExpressionTree
         public override string ToString()
         {
             return String.Format("{0}", Id);
-        }
-
-        public override ulong Eval(EvalContext context)
-        {
-            return context[this].Eval(context);
         }
     }
 }

@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using GameClient.Services;
 using GameClient.SExpressionTree;
 using GameClient.ViewModels;
@@ -26,8 +28,8 @@ namespace GameClient.Solvers
 
         public override bool CanSolve(Problem p)
         {
-            if (p.Size > 11)
-                return false;
+            //if (p.Size > 12)
+            //    return false;
 
             //if (!p.Operators.Contains("if0"))
             //    return false;
@@ -35,14 +37,15 @@ namespace GameClient.Solvers
             return !(p.Operators.Contains("fold") || p.Operators.Contains("tfold"));
         }
 
-        public Dictionary<string, SProgram> GenerateIndex(List<ulong> inputs, IEnumerable<SProgram> programs)
+        public ConcurrentDictionary<string, ProgramExpression> GenerateIndex(List<ulong> inputs,
+            ProgramExpression[] programs)
         {
-            var index = new Dictionary<string, SProgram>();
+            var index = new ConcurrentDictionary<string, ProgramExpression>();
 
             var sw = new Stopwatch();
             sw.Start();
 
-            foreach (var program in programs)
+            Parallel.ForEach(programs, program => //foreach(var program in programs)
             {
                 var results = program.Eval(inputs.ToArray());
                 var rs = String.Join(", ", results.Select(x => "0x" + x.ToString("X")));
@@ -50,7 +53,7 @@ namespace GameClient.Solvers
                 //Log.DebugFormat("{0} [{1}]", program, rs);
 
                 index[rs] = program;
-            }
+            });
 
             Log.DebugFormat("Generated index in {0:c}", sw.Elapsed);
 
@@ -59,9 +62,8 @@ namespace GameClient.Solvers
 
         public override bool Solve(Problem p)
         {
-
             var generator = new SProgramGenerator(p.Size, p.Operators.ToArray());
-            var programs = generator.GeneratePrograms();            
+            var programs = generator.GeneratePrograms();
 
             if (!programs.Any())
             {
@@ -70,9 +72,9 @@ namespace GameClient.Solvers
             }
 
             var inputs = new List<ulong>(TestValues);
-            var index = GenerateIndex(inputs, programs);
+            var index = GenerateIndex(inputs, programs.ToArray());
             var outputs = _client.Eval(p.Id, "(lambda (x) x)", TestValues);
-            var os = String.Join(", ", outputs.Select(x => "0x" + x.ToString("X")));         
+            var os = String.Join(", ", outputs.Select(x => "0x" + x.ToString("X")));
             //Log.DebugFormat("Got output string: {0}", os);
 
             while (true)
@@ -88,18 +90,17 @@ namespace GameClient.Solvers
                 if (!result.IsCorrect)
                 {
                     Log.WarnFormat("Made incorrect guess for problem {0}: {1}", p.Id, index[os]);
-                    Log.InfoFormat("Adding value {0}: theirs {1} mine {2}", result.Values[0], result.Values[1], result.Values[2]);
+                    Log.InfoFormat("Adding value {0}: theirs {1} mine {2}", result.Values[0], result.Values[1],
+                        result.Values[2]);
                     var newTestVal = Convert.ToUInt64(result.Values[0], 16);
                     var newTestSol = Convert.ToUInt64(result.Values[1], 16);
                     inputs.Add(newTestVal);
-                    index = GenerateIndex(inputs, programs);
-                    os = String.Format("{0}, {1}", os, "0x" + newTestSol.ToString("X"));         
-                    Log.DebugFormat("new solution target: {0}", os);                    
+                    index = GenerateIndex(inputs, programs.ToArray());
+                    os = String.Format("{0}, {1}", os, "0x" + newTestSol.ToString("X"));
+                    Log.DebugFormat("new solution target: {0}", os);
                 }
                 else
-                {
                     break;
-                }
             }
 
             Log.InfoFormat("Correctly guessed problem {0}: {1}", p.Id, index[os]);
