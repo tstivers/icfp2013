@@ -15,7 +15,7 @@ namespace GameClient.Extensions
             {
                 response = client.Execute<T>(request);
                 if ((int) response.StatusCode == 429)
-                    Thread.Sleep(TimeSpan.FromSeconds(20));
+                    Thread.Sleep(TimeSpan.FromSeconds(5));
             } while ((int) response.StatusCode == 429);
 
             if (response.StatusCode != HttpStatusCode.OK)

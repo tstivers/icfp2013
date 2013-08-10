@@ -100,12 +100,12 @@ namespace GameClient.SExpressionTree
             var e2 = new List<Tuple<SExpression, SExpression>>();
             var o = new List<SIf0Expression>();
 
-            for (var i = 1; i < size; i++)
+            for (var i = 1; i < size - 1; i++)
                 e1.AddRange(GenerateExpressions(i));
 
             foreach (var exp in e1)
             {
-                e2.AddRange(GenerateExpressions(size - exp.Size)
+                e2.AddRange(GenerateExpressions(size - exp.Size - 1)
                     .Select(x => new Tuple<SExpression, SExpression>(exp, x)));
             }
 

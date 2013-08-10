@@ -28,7 +28,7 @@ namespace GameConsole
 
             while (true)
             {
-                controller.Train(5);
+                controller.Train(9);
                 Console.ReadKey();
             }
 

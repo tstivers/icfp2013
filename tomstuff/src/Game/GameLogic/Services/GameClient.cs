@@ -21,7 +21,7 @@ namespace GameClient.Services
         IEnumerable<Problem> GetProblems();
         Problem GetTrainingProblem(int size, TrainingOperators operators);
         ulong[] Eval(string id, string program, ulong[] inputs);
-        bool Guess(string id, string program);
+        GuessResponse Guess(string id, string program);
     }
 
     public class GameClient : IGameClient
@@ -36,9 +36,7 @@ namespace GameClient.Services
             AuthToken = authToken + "vpsH1H";
             Endpoint = endpoint ?? "http://icfpc2013.cloudapp.net/";
             _client = new RestClient(Endpoint);
-        }
-
-        #region IGameClient Members
+        }   
 
         public IEnumerable<Problem> GetProblems()
         {
@@ -104,7 +102,7 @@ namespace GameClient.Services
             return evalResponse.Outputs.Select(x => Convert.ToUInt64(x, 16)).ToArray();
         }
 
-        public bool Guess(string id, string program)
+        public GuessResponse Guess(string id, string program)
         {
             var guessRequest = new GuessRequest {id = id, program = program,};
 
@@ -121,13 +119,7 @@ namespace GameClient.Services
             if (guessResponse.Status == "error")
                 throw new Exception(guessResponse.Message);
 
-            if (guessResponse.Status == "win")
-                return true;
-
-            throw new Exception(String.Format("mismatch: input {0} expected {1} but was {2}", guessResponse.Values[0],
-                guessResponse.Values[1], guessResponse.Values[2]));
-        }
-
-        #endregion
+            return guessResponse;
+        }       
     }
 }

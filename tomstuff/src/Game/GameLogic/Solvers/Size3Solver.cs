@@ -29,19 +29,19 @@ namespace GameClient.Solvers
             var outputs = _client.Eval(p.Id, "(lambda (x) x)", inputs);
 
             if (outputs[0] == 0xFFFFFFFFFFFFFFFF)
-                return _client.Guess(p.Id, "(lambda (x) (not x))");
+                return _client.Guess(p.Id, "(lambda (x) (not x))").IsCorrect;
 
             if (outputs[1] == 0x0000000000000002)
-                return _client.Guess(p.Id, "(lambda (x) (shl1 x))");
+                return _client.Guess(p.Id, "(lambda (x) (shl1 x))").IsCorrect;
 
             if (outputs[2] == 0x0ff0000000000000)
-                return _client.Guess(p.Id, "(lambda (x) (shr4 x))");
+                return _client.Guess(p.Id, "(lambda (x) (shr4 x))").IsCorrect;
 
             if (outputs[2] == 0x0000ff0000000000)
-                return _client.Guess(p.Id, "(lambda (x) (shr16 x))");
+                return _client.Guess(p.Id, "(lambda (x) (shr16 x))").IsCorrect;
 
             if (outputs[1] == 0x0000000000000000)
-                return _client.Guess(p.Id, "(lambda (x) (shr1 x))");
+                return _client.Guess(p.Id, "(lambda (x) (shr1 x))").IsCorrect;
 
             Debugger.Break();
 
