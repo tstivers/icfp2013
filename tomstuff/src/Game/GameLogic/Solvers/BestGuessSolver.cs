@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using GameClient.Exceptions;
 using GameClient.Extensions;
 using GameClient.Services;
 using GameClient.SExpressionTree;
@@ -51,7 +52,7 @@ namespace GameClient.Solvers
 
         public override bool CanSolve(Problem p)
         {
-            return p.Size > 12 && p.Operators.Count >= 9;
+            return p.Size > 11;
         }
 
         private void AdjustOperators(Problem p)
@@ -65,28 +66,43 @@ namespace GameClient.Solvers
             Log.Info(p);
 
             var solved = false;
-            var operators = p.Operators.ToArray();            
+            var operators = p.Operators.ToArray();
+            var firstPass = true;
+            int sizeAdjust = 0;
 
             while (!solved)
             {
-                solved = AttemptSolution(p, operators);
+                try
+                {
+                    solved = AttemptSolution(p, operators, sizeAdjust);
+                    firstPass = false;
+                }
+                catch (OutOfMemoryException)
+                {
+                    Log.Error("Ran out of memory!");
+                    if (firstPass)
+                        sizeAdjust--;
+                    else
+                    {
+                        return false;
+                    }
+                }
+                catch (ProblemExpiredException)
+                {
+                    Log.ErrorFormat("Problem expired :(");
+                    return false;
+                }
+
                 if (solved)
                     return true;
 
-                if (operators.Length > 8) // lets chop off a random operator and try again
-                {
-                    operators = _random.Shuffle(p.Operators.ToArray()).Take(6).ToArray();
-                }
-                else
-                {
-                    operators = _random.Shuffle(p.Operators.ToArray()).Take(4).ToArray();
-                }
+                sizeAdjust++;
             }
 
             return solved;
         }
 
-        public bool AttemptSolution(Problem p, string[] operators)
+        public bool AttemptSolution(Problem p, string[] operators, int sizeAdjust)
         {
             var generator = new SProgramGenerator(p.Size, operators);
 
@@ -114,6 +130,8 @@ namespace GameClient.Solvers
                     maxSize = 9;
                     break;
             }
+
+            maxSize += sizeAdjust;
 
             var programs = generator.GenerateProgramRange(3, maxSize);
             if (programs.Count < 1500000)

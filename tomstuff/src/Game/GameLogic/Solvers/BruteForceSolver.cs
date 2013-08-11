@@ -34,7 +34,7 @@ namespace GameClient.Solvers
             if (p.Size == 12 && p.Operators.Count() > 5)
                 return false;
 
-            return true;
+            return false;
         }
 
         public ConcurrentDictionary<string, ProgramExpression> GenerateIndex(List<ulong> inputs,
