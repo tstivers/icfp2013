@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Remoting.Contexts;
 using System.Threading.Tasks;
+using GameClient.Containers;
 using GameClient.Exceptions;
 using GameClient.Extensions;
 using GameClient.Services;
@@ -20,6 +21,7 @@ namespace GameClient.Solvers
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         private static Random _random = new Random();
         private static Stopwatch _stopwatch = new Stopwatch();
+        private static Stopwatch _totalTime = new Stopwatch();
         private static readonly IdExpression ProgId = new IdExpression("y");
 
         private static readonly ulong[] TestValues =
@@ -32,11 +34,10 @@ namespace GameClient.Solvers
         {
         }
 
-        public ConcurrentDictionary<string, ProgramExpression> GenerateIndex(List<ulong> inputs,
+        public MultiValueConcurrentDictionary<string, ProgramExpression> GenerateIndex(List<ulong> inputs,
             ProgramExpression[] programs)
         {
-            
-            var index = new ConcurrentDictionary<string, ProgramExpression>();
+            var index = new MultiValueConcurrentDictionary<string, ProgramExpression>();            
 
             var sw = new Stopwatch();
             sw.Start();
@@ -55,22 +56,19 @@ namespace GameClient.Solvers
 
                 var rs = String.Join(", ", results.Select(x => "0x" + x.ToString("X")));
 
-                index[rs] = program;
+                index.Add(rs, program);
             });
 
             //JetBrains.Profiler.Core.Api.PerformanceProfiler.Stop();
             //JetBrains.Profiler.Core.Api.PerformanceProfiler.EndSave();
 
-            Log.DebugFormat("Generated index in {0:c}", sw.Elapsed);
+            Log.DebugFormat("Generated index in {0:c} for {1} programs with {2} unique keys", sw.Elapsed, programs.Length, index.Count);
 
             return index;
         }
 
         public override bool CanSolve(Problem p)
-        {
-            if (p.Size > 23)
-                return false;
-
+        {           
             if (p.Operators.Contains("bonus"))
                 return false;
 
@@ -83,8 +81,7 @@ namespace GameClient.Solvers
         }
 
         public override bool Solve(Problem p)
-        {
-            Log.InfoFormat("\n\nSolving new {0}problem", p.Challenge != null ? "training " : "");
+        {            
             Log.Info(p);
 
             var solved = false;
@@ -92,6 +89,7 @@ namespace GameClient.Solvers
             var firstPass = true;
             int sizeAdjust = 0;
             _stopwatch.Reset();
+            _totalTime.Restart();
 
             while (!solved)
             {
@@ -120,6 +118,9 @@ namespace GameClient.Solvers
                 if (solved)
                     return true;
 
+                if (operators.Length > 6)
+                    return false;
+
                 sizeAdjust++;
             }
 
@@ -145,17 +146,18 @@ namespace GameClient.Solvers
                     break;
                 case 7:
                 case 8:
-                    maxSize = 10;
-                    break;
                 case 9:
-                    maxSize = 9;
-                    break;
+                    maxSize = 10;
+                    break;                                 
                 default:
                     maxSize = 9;
                     break;
             }
 
             maxSize += sizeAdjust;
+
+            if (maxSize > 11 && operators.Length > 5)
+                throw new OutOfMemoryException();
 
             var programs = generator.GenerateProgramRange(3, maxSize, ProgId);
             if (programs.Count < 1500000 && sizeAdjust > 0)
@@ -190,7 +192,7 @@ namespace GameClient.Solvers
                     return false;
                 }                
 
-                var result = _client.Guess(p.Id, index[os].ToString());
+                var result = _client.Guess(p.Id, index[os].FirstOrDefault().ToString());
 
                 if (!result.IsCorrect)
                 {
@@ -200,7 +202,7 @@ namespace GameClient.Solvers
                     var newTestVal = Convert.ToUInt64(result.Values[0], 16);
                     var newTestSol = Convert.ToUInt64(result.Values[1], 16);
                     inputs.Add(newTestVal);
-                    index = GenerateIndex(inputs, programs.ToArray());
+                    index = GenerateIndex(inputs, index[os].ToArray());
                     os = String.Format("{0}, {1}", os, "0x" + newTestSol.ToString("X"));
                     Log.DebugFormat("New solution target: {0}", os);
                 }
@@ -208,7 +210,8 @@ namespace GameClient.Solvers
                     break;
             }
             
-            Log.InfoFormat("Correctly guessed problem {0} in {1} seconds!", p.Id, _stopwatch.Elapsed.TotalSeconds);
+            Log.InfoFormat("Correctly guessed problem {0} in {1:c}", p.Id, _totalTime.Elapsed);
+            Log.InfoFormat("Solution: {0}", index[os].FirstOrDefault());
 
             return true;
         }

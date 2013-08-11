@@ -182,7 +182,6 @@ namespace GameClient.SExpressionTree
 
         private List<Op1Expression> GenerateOp1Expressions(Op1Codes opCode, int size, bool inFold)
         {
-            //Log.DebugFormat("Generating op1 expressions of size {0}", size);
             var ops = GenerateExpressions(size - 1, inFold).Select(e1 => new Op1Expression(opCode, e1)).ToList();
 
             //Debug.Assert(ops.All(op => op.Size == size));
@@ -199,15 +198,16 @@ namespace GameClient.SExpressionTree
             var maxExpSize = size - 2;
             var totalExpSize = size - 1;
 
+
             for (var i = 1; i <= maxExpSize; i++)
+            {
                 e1List.AddRange(GenerateExpressions(i, inFold));
+            }
 
             foreach (var e1 in e1List)
             {
                 ops.AddRange(
                     GenerateExpressions(totalExpSize - e1.Size, inFold).Select(e2 => new Op2Expression(opCode, e1, e2)));
-                if (_stopwatch.Elapsed.TotalSeconds > 300)
-                    throw new ProblemExpiredException();
             }
 
             //Debug.Assert(ops.All(op => op.Size == size));
@@ -226,7 +226,9 @@ namespace GameClient.SExpressionTree
             var totalExpSize = size - 1;
 
             for (var i = 1; i <= maxExpSize; i++)
+            {
                 e1List.AddRange(GenerateExpressions(i, inFold));
+            }
 
             foreach (var e1 in e1List)
             {
@@ -235,8 +237,6 @@ namespace GameClient.SExpressionTree
                     e2List.AddRange(
                         GenerateExpressions(i, inFold).Select(e2 => new Tuple<IExpression, IExpression>(e1, e2)));                  
                 }
-                if (_stopwatch.Elapsed.TotalSeconds > 300)
-                    throw new ProblemExpiredException();
             }
 
             foreach (var e1e2 in e2List)
@@ -244,8 +244,6 @@ namespace GameClient.SExpressionTree
                 ops.AddRange(
                     GenerateExpressions(totalExpSize - e1e2.Item1.Size - e1e2.Item2.Size, inFold)
                         .Select(e3 => new If0Expression(e1e2.Item1, e1e2.Item2, e3)));
-                if (_stopwatch.Elapsed.TotalSeconds > 300)
-                    throw new ProblemExpiredException();
             }
 
             //Debug.Assert(ops.All(op => op.Size == size));
@@ -263,7 +261,9 @@ namespace GameClient.SExpressionTree
             var totalExpSize = size - 2;
 
             for (var i = 1; i <= maxExpSize; i++)
+            {
                 e0List.AddRange(GenerateExpressions(i, false));
+            }
 
             foreach (var e0 in e0List)
             {
@@ -272,8 +272,6 @@ namespace GameClient.SExpressionTree
                     e0e1List.AddRange(
                         GenerateExpressions(i, false).Select(e1 => new Tuple<IExpression, IExpression>(e0, e1)));
                 }
-                if (_stopwatch.Elapsed.TotalSeconds > 300)
-                    throw new ProblemExpiredException();
             }
 
             foreach (var e0e1 in e0e1List)
@@ -281,8 +279,6 @@ namespace GameClient.SExpressionTree
                 ops.AddRange(
                     GenerateExpressions(totalExpSize - e0e1.Item1.Size - e0e1.Item2.Size, true)
                         .Select(e2 => new FoldExpression(e0e1.Item1, e0e1.Item2, F1Expression, F2Expression, e2)));
-                if (_stopwatch.Elapsed.TotalSeconds > 300)
-                    throw new ProblemExpiredException();
             }
 
             //Debug.Assert(ops.All(op => op.Size == size));

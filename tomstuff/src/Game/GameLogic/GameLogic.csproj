@@ -79,6 +79,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Containers\MultiValueConcurrentDictionary.cs" />
     <Compile Include="Controllers\SimpleController.cs" />
     <Compile Include="Exceptions\ProblemExpiredException.cs" />
     <Compile Include="Extensions\RandomExtensions.cs" />
