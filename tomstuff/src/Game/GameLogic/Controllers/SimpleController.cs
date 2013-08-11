@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using GameClient.Exceptions;
 using GameClient.Extensions;
 using GameClient.Services;
 using GameClient.SExpressionTree;
@@ -35,60 +36,51 @@ namespace GameClient.Controllers
                     solver.Solve(problem);
             }
         }
-
-        public void Train(string id)
-        {
-            var problem = new Problem
-            {
-                Challenge =
-                    "(lambda (x_4468) (fold (shl1 x_4468) (shr4 x_4468) (lambda (x_4469 x_4470) (if0 x_4469 x_4469 x_4470))))",
-                Id = id,
-                Size = 11,
-                Operators = new List<string> {"fold", "if0", "shl1", "shr4"}
-            };
-
-            Log.InfoFormat("Got training program: {0}", SProgramParser.Parse(problem.Challenge));
-
-            foreach (var solver in _solvers)
-            {
-                if (solver.CanSolve(problem))
-                    solver.Solve(problem);
-            }
-        }
-
+       
         public void Guess()
-        {
-            int solved = 0, skipped = 0, expired = 0;
+        {            
             var stopwatch = new Stopwatch();
-            var random = new Random();
-
-            var problems = _client.GetProblems().ToArray();
-            Log.InfoFormat("Loaded {0} problems", problems.Count());
-
-            problems =
-                problems.Where(
-                    problem => problem.Solved == false && !problem.TimeLeft.HasValue && _solvers[0].CanSolve(problem))
-                    .ToArray();
-
-            Log.InfoFormat("Attempting to solve {0} of them this run", problems.Length);
+            var random = new Random();           
 
             var index = 1;
             stopwatch.Start();
 
             while (true)
             {
+                stopwatch.Restart();
+                var allProblems = _client.GetProblems();
+
+                var totalSolved = allProblems.Count(x => x.Solved);
+                var totalFailed = allProblems.Count(x => !x.Solved && x.TimeLeft.HasValue && !(x.TimeLeft.Value > 0.0));                
+
+                var problems =
+                    random.Shuffle(
+                        _client.GetProblems()
+                            .Where(p => p.Solved == false && !p.TimeLeft.HasValue && _solvers[0].CanSolve(p))
+                            .ToArray());
+
+                if (problems.Length == 0)
+                    break;
+
                 foreach (var problem in random.Shuffle(problems))
                 {
                     foreach (var solver in _solvers)
                     {
                         if (solver.CanSolve(problem))
                         {
-                            Log.InfoFormat("\n[{0}] Solving problem [{1}/{2}]", DateTime.Now, index, problems.Length);
-                            solver.Solve(problem);
+                            Log.InfoFormat("\n[{0}] Starting problem solution {{remaining: {1}  solved: {2}  failed: {3}}}", DateTime.Now, problems.Length, totalSolved, totalFailed);
+                            try
+                            {
+                                solver.Solve(problem);
+                            }
+                            catch (AlreadySolvedException)
+                            {
+                                Log.WarnFormat("Problem was already solved!");
+                                break;
+                            }
                         }
-                        else
-                            skipped++;
                     }
+
                     index++;
 
                     if (stopwatch.Elapsed.TotalMinutes > 4)
@@ -97,18 +89,8 @@ namespace GameClient.Controllers
                     }
                 }
 
-                stopwatch.Restart();
-                problems =
-                    random.Shuffle(
-                        _client.GetProblems()
-                            .Where(p => p.Solved == false && !p.TimeLeft.HasValue && _solvers[0].CanSolve(p))
-                            .ToArray());
-
-                if (problems.Length == 0)
-                    break;
-            }
-
-            Log.InfoFormat("{0} solved  {1} skipped  {2} expired", solved, skipped, expired);
+              
+            }            
         }
     }
 }

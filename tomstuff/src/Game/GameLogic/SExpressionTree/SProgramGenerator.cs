@@ -120,7 +120,7 @@ namespace GameClient.SExpressionTree
                 results.AddRange(_noFoldCache[i - 1].Select(e0 => new ProgramExpression(id, e0)).ToList());
             }
 
-            Log.InfoFormat("Generated {0} programs in {1:c}", results.Count(), sw.Elapsed);
+            Log.InfoFormat("Generated {0:N0} programs in {1:c}", results.Count(), sw.Elapsed);
 
             return results;
         }

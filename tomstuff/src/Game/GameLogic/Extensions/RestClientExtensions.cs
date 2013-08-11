@@ -16,11 +16,14 @@ namespace GameClient.Extensions
             {
                 response = client.Execute<T>(request);
                 if ((int) response.StatusCode == 429)
-                    Thread.Sleep(TimeSpan.FromSeconds(5));
+                    Thread.Sleep(TimeSpan.FromSeconds(1));
             } while ((int) response.StatusCode == 429);
 
             if ((int)response.StatusCode == 410)
                 throw new ProblemExpiredException();
+
+            if ((int) response.StatusCode == 412)
+                throw new AlreadySolvedException();
 
             if (response.StatusCode != HttpStatusCode.OK)
                 throw new Exception("Service call returned invalid response");

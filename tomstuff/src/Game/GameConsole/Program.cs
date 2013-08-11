@@ -22,11 +22,11 @@ namespace GameConsole
 
             var rnd = new Random();
 
-            while (!Console.KeyAvailable)
-                controller.Train(rnd.Next(12, 23));
-            Console.ReadKey(true);
+            //while (!Console.KeyAvailable)
+            //   controller.Train(rnd.Next(10, 30));
+            //Console.ReadKey(true);
 
-            //controller.Guess();
+            controller.Guess();
 
             Log.Info("Finished run");
             Console.ReadKey(true);
