@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using GameClient.Extensions;
 using GameClient.Services;
 using GameClient.SExpressionTree;
 using GameClient.ViewModels;
@@ -15,6 +16,7 @@ namespace GameClient.Solvers
     public class BestGuessSolver : SolverBase
     {
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static Random _random = new Random();
 
         private static readonly ulong[] TestValues =
         {
@@ -49,36 +51,59 @@ namespace GameClient.Solvers
 
         public override bool CanSolve(Problem p)
         {
-            return p.Size > 12 && p.Operators.Count < 9;
+            return p.Size > 12 && p.Operators.Count >= 9;
         }
 
         private void AdjustOperators(Problem p)
         {
             //if (p.Operators.Count > 5)
-
         }
 
         public override bool Solve(Problem p)
         {
             Log.Info("\n\nSolving new problem");
-            Log.Info(p);            
+            Log.Info(p);
 
-            var generator = new SProgramGenerator(p.Size, p.Operators.ToArray());
+            var solved = false;
+            var operators = p.Operators.ToArray();            
+
+            while (!solved)
+            {
+                solved = AttemptSolution(p, operators);
+                if (solved)
+                    return true;
+
+                if (operators.Length > 8) // lets chop off a random operator and try again
+                {
+                    operators = _random.Shuffle(p.Operators.ToArray()).Take(6).ToArray();
+                }
+                else
+                {
+                    operators = _random.Shuffle(p.Operators.ToArray()).Take(4).ToArray();
+                }
+            }
+
+            return solved;
+        }
+
+        public bool AttemptSolution(Problem p, string[] operators)
+        {
+            var generator = new SProgramGenerator(p.Size, operators);
 
             int maxSize;
 
-            switch (p.Operators.Count)
+            switch (operators.Length)
             {
                 case 2:
                 case 3:
-                case 4:                
+                case 4:
                     maxSize = 12;
-                    break;    
+                    break;
                 case 5:
-                case 6:                              
+                case 6:
                     maxSize = 11;
                     break;
-                case 7:            
+                case 7:
                 case 8:
                     maxSize = 10;
                     break;

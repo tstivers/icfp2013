@@ -23,7 +23,7 @@ namespace GameConsole
             var rnd = new Random();
 
             while (!Console.KeyAvailable)
-                controller.Train(rnd.Next(14, 30));
+                controller.Train(rnd.Next(26, 30));
             Console.ReadKey(true);
 
             //controller.Guess();
