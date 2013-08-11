@@ -35,6 +35,8 @@ namespace GameClient.SExpressionTree
             new ConcurrentDictionary<int, List<IExpression>>();
 
         private readonly string[][] _opPool;
+        private readonly Op1Codes[] _op1Codes;
+        private readonly Op2Codes[] _op2Codes;
         public int Size { get; set; }
         public string[] Operators { get; set; }
 
@@ -45,8 +47,18 @@ namespace GameClient.SExpressionTree
 
             _opPool = new string[6][];
             _opPool[1] = new[] {"0", "1"};
-            _opPool[2] = new[] {"not", "shl1", "shr1", "shr4", "shr16"}.Intersect(Operators).ToArray();
-            _opPool[3] = new[] {"and", "or", "xor", "plus"}.Intersect(Operators).ToArray();
+            _op1Codes = new[] {Op1Codes.not, Op1Codes.shl1, Op1Codes.shr1, Op1Codes.shr4, Op1Codes.shr16}.Intersect(Operators.Where(
+                x =>
+                {
+                    Op1Codes code;
+                    return Op1Codes.TryParse(x, out code);
+                }).Select(x => (Op1Codes)Enum.Parse(typeof(Op1Codes), x))).ToArray();
+            _op2Codes = new[] { Op2Codes.and, Op2Codes.or, Op2Codes.plus, Op2Codes.xor }.Intersect(Operators.Where(
+               x =>
+               {
+                   Op2Codes code;
+                   return Op2Codes.TryParse(x, out code);
+               }).Select(x => (Op2Codes)Enum.Parse(typeof(Op2Codes), x))).ToArray();            
             _opPool[4] = new[] {"if0"}.Intersect(Operators).ToArray();
             _opPool[5] = new[] {"fold"}.Intersect(Operators).ToArray();
         }
@@ -132,13 +144,13 @@ namespace GameClient.SExpressionTree
 
             if (size >= 2)
             {
-                foreach (var opCode in _opPool[2])
+                foreach (var opCode in _op1Codes)
                     expressions.AddRange(GenerateOp1Expressions(opCode, size, inFold));
             }
 
             if (size >= 3)
             {
-                foreach (var opCode in _opPool[3])
+                foreach (var opCode in _op2Codes)
                     expressions.AddRange(GenerateOp2Expressions(opCode, size, inFold));
             }
 
@@ -165,7 +177,7 @@ namespace GameClient.SExpressionTree
             return expressions;
         }
 
-        private List<Op1Expression> GenerateOp1Expressions(string opCode, int size, bool inFold)
+        private List<Op1Expression> GenerateOp1Expressions(Op1Codes opCode, int size, bool inFold)
         {
             //Log.DebugFormat("Generating op1 expressions of size {0}", size);
             var ops = GenerateExpressions(size - 1, inFold).Select(e1 => new Op1Expression(opCode, e1)).ToList();
@@ -176,7 +188,7 @@ namespace GameClient.SExpressionTree
             return ops;
         }
 
-        private List<Op2Expression> GenerateOp2Expressions(string opCode, int size, bool inFold)
+        private List<Op2Expression> GenerateOp2Expressions(Op2Codes opCode, int size, bool inFold)
         {
             //Log.DebugFormat("Generating op2 expressions of size {0}", size);
             var e1List = new List<IExpression>();

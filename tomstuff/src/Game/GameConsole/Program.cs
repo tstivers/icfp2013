@@ -20,8 +20,10 @@ namespace GameConsole
             // create a solver controller
             var controller = new SimpleController(client);
 
+            var rnd = new Random();
+
             while (!Console.KeyAvailable)
-                controller.Train(16);
+                controller.Train(rnd.Next(14, 30));
             Console.ReadKey(true);
 
             //controller.Guess();

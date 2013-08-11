@@ -15,9 +15,9 @@ namespace GameClient.ViewModels
         
         public override string ToString()
         {
-            var s = String.Format("Id: {0}\nSize: {1}\nOperators: {2}", Id, Size, String.Join(", ", Operators.Select(x => "\"" + x + "\"")));
-            if (Challenge != null)
-                s += String.Format("\nChallenge: {0}", Challenge);
+            var s = String.Format("Id: {0}\nSize: {1}\nOperators: [{2}] {3}", Id, Size, Operators.Count, String.Join(",", Operators.Select(x => "\"" + x + "\"")));
+            //if (Challenge != null)
+            //    s += String.Format("\nChallenge: {0}", Challenge);
 
             return s;
         }

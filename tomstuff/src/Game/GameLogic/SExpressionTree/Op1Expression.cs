@@ -2,14 +2,29 @@
 
 namespace GameClient.SExpressionTree
 {
+    public enum Op1Codes : byte
+    {
+        not,
+        shl1,
+        shr1,
+        shr4,
+        shr16
+    }
+
     public class Op1Expression : IExpression
     {
         private readonly IExpression _e0;
-        private readonly string _opCode;
+        private readonly Op1Codes _opCode;
+
+        public Op1Expression(Op1Codes opCode, IExpression e0)
+        {
+            _opCode = opCode;
+            _e0 = e0;
+        }
 
         public Op1Expression(string opCode, IExpression e0)
         {
-            _opCode = opCode;
+            _opCode = (Op1Codes)Enum.Parse(typeof(Op1Codes), opCode);
             _e0 = e0;
         }
 
@@ -23,15 +38,15 @@ namespace GameClient.SExpressionTree
 
             switch (_opCode)
             {
-                case "not":
+                case Op1Codes.not:
                     return ~val;
-                case "shl1":
+                case Op1Codes.shl1:
                     return val << 1;
-                case "shr1":
+                case Op1Codes.shr1:
                     return val >> 1;
-                case "shr4":
+                case Op1Codes.shr4:
                     return val >> 4;
-                case "shr16":
+                case Op1Codes.shr16:
                     return val >> 16;
             }
 

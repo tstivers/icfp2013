@@ -49,7 +49,13 @@ namespace GameClient.Solvers
 
         public override bool CanSolve(Problem p)
         {
-            return p.Size > 12;
+            return p.Size > 12 && p.Operators.Count < 9;
+        }
+
+        private void AdjustOperators(Problem p)
+        {
+            //if (p.Operators.Count > 5)
+
         }
 
         public override bool Solve(Problem p)
@@ -58,7 +64,38 @@ namespace GameClient.Solvers
             Log.Info(p);            
 
             var generator = new SProgramGenerator(p.Size, p.Operators.ToArray());
-            var programs = generator.GenerateProgramRange(3, 12 - (p.Operators.Count - 4));
+
+            int maxSize;
+
+            switch (p.Operators.Count)
+            {
+                case 2:
+                case 3:
+                case 4:                
+                    maxSize = 12;
+                    break;    
+                case 5:
+                case 6:                              
+                    maxSize = 11;
+                    break;
+                case 7:            
+                case 8:
+                    maxSize = 10;
+                    break;
+                case 9:
+                    maxSize = 9;
+                    break;
+                default:
+                    maxSize = 9;
+                    break;
+            }
+
+            var programs = generator.GenerateProgramRange(3, maxSize);
+            if (programs.Count < 1500000)
+            {
+                Log.Warn("Regenerating to have a better chance of finding a solution");
+                programs = generator.GenerateProgramRange(3, maxSize + 1);
+            }
 
             if (!programs.Any())
             {
@@ -84,15 +121,15 @@ namespace GameClient.Solvers
 
                 if (!result.IsCorrect)
                 {
-                    Log.WarnFormat("Made incorrect guess for problem {0}: {1}", p.Id, index[os]);
-                    Log.InfoFormat("Adding value {0}: theirs {1} mine {2}", result.Values[0], result.Values[1],
+                    Log.WarnFormat("Made incorrect guess for problem", p.Id, index[os]);
+                    Log.DebugFormat("For input value {0}: theirs = {1},  mine = {2}", result.Values[0], result.Values[1],
                         result.Values[2]);
                     var newTestVal = Convert.ToUInt64(result.Values[0], 16);
                     var newTestSol = Convert.ToUInt64(result.Values[1], 16);
                     inputs.Add(newTestVal);
                     index = GenerateIndex(inputs, programs.ToArray());
                     os = String.Format("{0}, {1}", os, "0x" + newTestSol.ToString("X"));
-                    Log.DebugFormat("new solution target: {0}", os);
+                    Log.DebugFormat("New solution target: {0}", os);
                 }
                 else
                     break;

@@ -2,15 +2,30 @@
 
 namespace GameClient.SExpressionTree
 {
+    public enum Op2Codes : byte
+    {
+        and,
+        or,
+        xor,
+        plus,        
+    }
+
     public class Op2Expression : IExpression
     {
         private readonly IExpression _e0;
         private readonly IExpression _e1;
-        private readonly string _opCode;
+        private readonly Op2Codes _opCode;
+
+        public Op2Expression(Op2Codes opCode, IExpression e0, IExpression e1)
+        {
+            _opCode = opCode;
+            _e0 = e0;
+            _e1 = e1;
+        }
 
         public Op2Expression(string opCode, IExpression e0, IExpression e1)
         {
-            _opCode = opCode;
+            _opCode = (Op2Codes)Enum.Parse(typeof(Op2Codes), opCode);
             _e0 = e0;
             _e1 = e1;
         }
@@ -26,13 +41,13 @@ namespace GameClient.SExpressionTree
 
             switch (_opCode)
             {
-                case "and":
+                case Op2Codes.and:
                     return val1 & val2;
-                case "or":
+                case Op2Codes.or:
                     return val1 | val2;
-                case "xor":
+                case Op2Codes.xor:
                     return val1 ^ val2;
-                case "plus":
+                case Op2Codes.plus:
                     return val1 + val2;
             }
 
