@@ -49,7 +49,7 @@ namespace GameClient.Solvers
 
         public override bool CanSolve(Problem p)
         {
-            return p.Size > 12 && p.Operators.Count < 5;
+            return p.Size > 12;
         }
 
         public override bool Solve(Problem p)
@@ -58,7 +58,7 @@ namespace GameClient.Solvers
             Log.Info(p);            
 
             var generator = new SProgramGenerator(p.Size, p.Operators.ToArray());
-            var programs = generator.GenerateProgramRange(3, 12);
+            var programs = generator.GenerateProgramRange(3, 12 - (p.Operators.Count - 4));
 
             if (!programs.Any())
             {
