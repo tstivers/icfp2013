@@ -62,7 +62,7 @@ namespace GameClient.Solvers
 
         public override bool Solve(Problem p)
         {
-            var generator = new SProgramGenerator(p.Size, p.Operators.ToArray());
+            var generator = new SProgramGenerator(p.Size, p.Operators.ToArray(), new Stopwatch());
             var programs = generator.GeneratePrograms();
 
             if (!programs.Any())

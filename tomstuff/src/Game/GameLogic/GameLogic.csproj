@@ -55,6 +55,9 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="JetBrains.Profiler.Core.Api">
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\JetBrains\dotTrace\v5.3\Bin\JetBrains.Profiler.Core.Api.dll</HintPath>
+    </Reference>
     <Reference Include="log4net, Version=1.2.11.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <Private>True</Private>
     </Reference>

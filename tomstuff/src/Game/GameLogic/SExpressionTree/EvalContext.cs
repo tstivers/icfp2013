@@ -11,5 +11,10 @@ namespace GameClient.SExpressionTree
         public EvalContext(EvalContext parent) : base(parent)
         {
         }
+
+        public EvalContext(IdExpression id, IExpression value)
+        {
+            this[id] = value;
+        }
     }
 }

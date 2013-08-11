@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Remoting.Contexts;
 using System.Threading.Tasks;
 using GameClient.Exceptions;
 using GameClient.Extensions;
@@ -18,6 +19,8 @@ namespace GameClient.Solvers
     {
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         private static Random _random = new Random();
+        private static Stopwatch _stopwatch = new Stopwatch();
+        private static readonly IdExpression ProgId = new IdExpression("y");
 
         private static readonly ulong[] TestValues =
         {
@@ -32,18 +35,31 @@ namespace GameClient.Solvers
         public ConcurrentDictionary<string, ProgramExpression> GenerateIndex(List<ulong> inputs,
             ProgramExpression[] programs)
         {
+            
             var index = new ConcurrentDictionary<string, ProgramExpression>();
 
             var sw = new Stopwatch();
             sw.Start();
 
+            //JetBrains.Profiler.Core.Api.PerformanceProfiler.Begin();
+            //JetBrains.Profiler.Core.Api.PerformanceProfiler.Start();
+
+            EvalContext[] contexts = inputs.Select(input => new EvalContext(ProgId, new NumberExpression(input))).ToArray();
+
             Parallel.ForEach(programs, program =>
             {
-                var results = program.Eval(inputs.ToArray());
+                var results = new List<ulong>(contexts.Length);
+
+                foreach(var context in contexts)
+                    results.Add(program.Eval(context));
+
                 var rs = String.Join(", ", results.Select(x => "0x" + x.ToString("X")));
 
                 index[rs] = program;
             });
+
+            //JetBrains.Profiler.Core.Api.PerformanceProfiler.Stop();
+            //JetBrains.Profiler.Core.Api.PerformanceProfiler.EndSave();
 
             Log.DebugFormat("Generated index in {0:c}", sw.Elapsed);
 
@@ -52,7 +68,13 @@ namespace GameClient.Solvers
 
         public override bool CanSolve(Problem p)
         {
-            return p.Size > 11;
+            if (p.Size > 23)
+                return false;
+
+            if (p.Operators.Contains("bonus"))
+                return false;
+
+            return true;
         }
 
         private void AdjustOperators(Problem p)
@@ -62,13 +84,14 @@ namespace GameClient.Solvers
 
         public override bool Solve(Problem p)
         {
-            Log.Info("\n\nSolving new problem");
+            Log.InfoFormat("\n\nSolving new {0}problem", p.Challenge != null ? "training " : "");
             Log.Info(p);
 
             var solved = false;
             var operators = p.Operators.ToArray();
             var firstPass = true;
             int sizeAdjust = 0;
+            _stopwatch.Reset();
 
             while (!solved)
             {
@@ -81,17 +104,18 @@ namespace GameClient.Solvers
                 {
                     Log.Error("Ran out of memory!");
                     if (firstPass)
-                        sizeAdjust--;
-                    else
                     {
-                        return false;
+                        sizeAdjust--;
+                        continue;
                     }
+                   
+                    return false;                   
                 }
                 catch (ProblemExpiredException)
                 {
                     Log.ErrorFormat("Problem expired :(");
                     return false;
-                }
+                }                
 
                 if (solved)
                     return true;
@@ -104,7 +128,7 @@ namespace GameClient.Solvers
 
         public bool AttemptSolution(Problem p, string[] operators, int sizeAdjust)
         {
-            var generator = new SProgramGenerator(p.Size, operators);
+            var generator = new SProgramGenerator(p.Size, operators, _stopwatch);
 
             int maxSize;
 
@@ -133,11 +157,11 @@ namespace GameClient.Solvers
 
             maxSize += sizeAdjust;
 
-            var programs = generator.GenerateProgramRange(3, maxSize);
-            if (programs.Count < 1500000)
+            var programs = generator.GenerateProgramRange(3, maxSize, ProgId);
+            if (programs.Count < 1500000 && sizeAdjust > 0)
             {
                 Log.Warn("Regenerating to have a better chance of finding a solution");
-                programs = generator.GenerateProgramRange(3, maxSize + 1);
+                programs = generator.GenerateProgramRange(3, maxSize + 1, ProgId);
             }
 
             if (!programs.Any())
@@ -149,22 +173,28 @@ namespace GameClient.Solvers
             var inputs = new List<ulong>(TestValues);
             var index = GenerateIndex(inputs, programs.ToArray());
             var outputs = _client.Eval(p.Id, "(lambda (x) x)", TestValues);
+            if (!_stopwatch.IsRunning)
+                _stopwatch.Restart();
+
             var os = String.Join(", ", outputs.Select(x => "0x" + x.ToString("X")));
             //Log.DebugFormat("Got output string: {0}", os);
 
             while (true)
             {
+                if (_stopwatch.Elapsed.TotalSeconds > 300)
+                    throw new ProblemExpiredException();
+
                 if (!index.ContainsKey(os))
                 {
                     Log.ErrorFormat("Failed to find solution for problem {0}", p.Id);
                     return false;
-                }
+                }                
 
                 var result = _client.Guess(p.Id, index[os].ToString());
 
                 if (!result.IsCorrect)
                 {
-                    Log.WarnFormat("Made incorrect guess for problem", p.Id, index[os]);
+                    Log.WarnFormat("Made incorrect guess, rebuilding index ({0} seconds remaining)", 300 - _stopwatch.Elapsed.TotalSeconds);
                     Log.DebugFormat("For input value {0}: theirs = {1},  mine = {2}", result.Values[0], result.Values[1],
                         result.Values[2]);
                     var newTestVal = Convert.ToUInt64(result.Values[0], 16);
@@ -177,8 +207,8 @@ namespace GameClient.Solvers
                 else
                     break;
             }
-
-            Log.InfoFormat("Correctly guessed problem {0}: {1}", p.Id, index[os]);
+            
+            Log.InfoFormat("Correctly guessed problem {0} in {1} seconds!", p.Id, _stopwatch.Elapsed.TotalSeconds);
 
             return true;
         }

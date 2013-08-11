@@ -29,11 +29,11 @@ namespace GameClient.SExpressionTree
         public ulong Eval(EvalContext context)
         {
             var y = _e1;
+            var c = new EvalContext(context);
             foreach (var b in BitConverter.GetBytes(_e0.Eval(context)))
             {
                 var x = new NumberExpression(b);
-                //Debug.Print("evaluating {0} where {{{1}: {2}, {3}: {4}}}", _e2, _x, x, _y, y);
-                var c = new EvalContext(context);
+                //Debug.Print("evaluating {0} where {{{1}: {2}, {3}: {4}}}", _e2, _x, x, _y, y);                
                 c[_x] = x;
                 c[_y] = y;
                 y = new NumberExpression(_e2.Eval(c));

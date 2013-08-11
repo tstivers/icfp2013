@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using GameClient.Exceptions;
 using log4net;
 
 namespace GameClient.SExpressionTree
@@ -28,11 +29,11 @@ namespace GameClient.SExpressionTree
 
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-        private readonly ConcurrentDictionary<int, List<IExpression>> _foldCache =
-            new ConcurrentDictionary<int, List<IExpression>>();
+        private readonly Dictionary<int, List<IExpression>> _foldCache =
+            new Dictionary<int, List<IExpression>>();
 
-        private readonly ConcurrentDictionary<int, List<IExpression>> _noFoldCache =
-            new ConcurrentDictionary<int, List<IExpression>>();
+        private readonly Dictionary<int, List<IExpression>> _noFoldCache =
+            new Dictionary<int, List<IExpression>>();
 
         private readonly string[][] _opPool;
         private readonly Op1Codes[] _op1Codes;
@@ -40,10 +41,13 @@ namespace GameClient.SExpressionTree
         public int Size { get; set; }
         public string[] Operators { get; set; }
 
-        public SProgramGenerator(int size, string[] operators)
+        private readonly Stopwatch _stopwatch;
+
+        public SProgramGenerator(int size, string[] operators, Stopwatch stopwatch)
         {
             Size = size;
             Operators = operators.Where(x => x != "bonus").Select(x => x.Replace("tfold", "fold")).ToArray();
+            _stopwatch = stopwatch;
 
             _opPool = new string[6][];
             _opPool[1] = new[] {"0", "1"};
@@ -65,6 +69,7 @@ namespace GameClient.SExpressionTree
 
         public List<ProgramExpression> GeneratePrograms()
         {
+            GC.Collect();
             Log.InfoFormat("Generating all programs of size {0} using operators {1}", Size,
                 String.Join(",", Operators.Select(x => "\"" + x + "\"")));
 
@@ -90,15 +95,14 @@ namespace GameClient.SExpressionTree
             return results;
         }
 
-        public List<ProgramExpression> GenerateProgramRange(int min, int max)
+        public List<ProgramExpression> GenerateProgramRange(int min, int max, IdExpression id)
         {
+            GC.Collect();
             Log.InfoFormat("Generating all programs of size {0} - {1} using operators {2}", min, max,
                 String.Join(",", Operators.Select(x => "\"" + x + "\"")));
 
             _noFoldCache[1] = NoFoldIds;
-            _foldCache[1] = FoldIds;
-
-            var id = new IdExpression(OpName);
+            _foldCache[1] = FoldIds;            
 
             var sw = new Stopwatch();
             sw.Start();
@@ -113,11 +117,7 @@ namespace GameClient.SExpressionTree
             var results = new List<ProgramExpression>();
             for (var i = min; i <= max; i++)
             {
-                results.AddRange(_noFoldCache[i - 1].Where(expression =>
-                {
-                    var expressionText = expression.ToString();
-                    return expressionText.Contains(OpName);
-                }).Select(e0 => new ProgramExpression(id, e0)).ToList());
+                results.AddRange(_noFoldCache[i - 1].Select(e0 => new ProgramExpression(id, e0)).ToList());
             }
 
             Log.InfoFormat("Generated {0} programs in {1:c}", results.Count(), sw.Elapsed);
@@ -129,6 +129,9 @@ namespace GameClient.SExpressionTree
         {
             if (size == 0)
                 throw new ArgumentException("Attempted to generate size 0 expressions");
+
+            if (_stopwatch.Elapsed.TotalSeconds > 300)
+                throw new ProblemExpiredException();
 
             List<IExpression> expressions;
 
@@ -203,6 +206,8 @@ namespace GameClient.SExpressionTree
             {
                 ops.AddRange(
                     GenerateExpressions(totalExpSize - e1.Size, inFold).Select(e2 => new Op2Expression(opCode, e1, e2)));
+                if (_stopwatch.Elapsed.TotalSeconds > 300)
+                    throw new ProblemExpiredException();
             }
 
             //Debug.Assert(ops.All(op => op.Size == size));
@@ -228,8 +233,10 @@ namespace GameClient.SExpressionTree
                 for (var i = 1; i <= totalExpSize - e1.Size - 1; i++)
                 {
                     e2List.AddRange(
-                        GenerateExpressions(i, inFold).Select(e2 => new Tuple<IExpression, IExpression>(e1, e2)));
+                        GenerateExpressions(i, inFold).Select(e2 => new Tuple<IExpression, IExpression>(e1, e2)));                  
                 }
+                if (_stopwatch.Elapsed.TotalSeconds > 300)
+                    throw new ProblemExpiredException();
             }
 
             foreach (var e1e2 in e2List)
@@ -237,6 +244,8 @@ namespace GameClient.SExpressionTree
                 ops.AddRange(
                     GenerateExpressions(totalExpSize - e1e2.Item1.Size - e1e2.Item2.Size, inFold)
                         .Select(e3 => new If0Expression(e1e2.Item1, e1e2.Item2, e3)));
+                if (_stopwatch.Elapsed.TotalSeconds > 300)
+                    throw new ProblemExpiredException();
             }
 
             //Debug.Assert(ops.All(op => op.Size == size));
@@ -263,6 +272,8 @@ namespace GameClient.SExpressionTree
                     e0e1List.AddRange(
                         GenerateExpressions(i, false).Select(e1 => new Tuple<IExpression, IExpression>(e0, e1)));
                 }
+                if (_stopwatch.Elapsed.TotalSeconds > 300)
+                    throw new ProblemExpiredException();
             }
 
             foreach (var e0e1 in e0e1List)
@@ -270,6 +281,8 @@ namespace GameClient.SExpressionTree
                 ops.AddRange(
                     GenerateExpressions(totalExpSize - e0e1.Item1.Size - e0e1.Item2.Size, true)
                         .Select(e2 => new FoldExpression(e0e1.Item1, e0e1.Item2, F1Expression, F2Expression, e2)));
+                if (_stopwatch.Elapsed.TotalSeconds > 300)
+                    throw new ProblemExpiredException();
             }
 
             //Debug.Assert(ops.All(op => op.Size == size));
