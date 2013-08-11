@@ -21,12 +21,13 @@ namespace GameConsole
             var controller = new SimpleController(client);
 
             while (!Console.KeyAvailable)
-                controller.Train(11);
+                controller.Train(14);
+            Console.ReadKey(true);
 
             //controller.Guess();
 
             Log.Info("Finished run");
-            Console.ReadKey();
+            Console.ReadKey(true);
         }
     }
 }

@@ -18,14 +18,12 @@ namespace GameClient.Controllers
         public SimpleController(IGameClient client)
         {
             _client = client;
-            _solvers = new SolverBase[] {/*new Size3Solver(_client), */ new BruteForceSolver(_client)};
+            _solvers = new SolverBase[] {/*new Size3Solver(_client), */ new BruteForceSolver(_client), new BestGuessSolver(_client), };
         }
 
         public void Train(int size, TrainingOperators operators = TrainingOperators.Empty)
         {
             var problem = _client.GetTrainingProblem(size, operators);
-
-            Log.InfoFormat("Got training program: {0}", SProgramParser.Parse(problem.Challenge));
 
             foreach (var solver in _solvers)
             {
@@ -38,10 +36,10 @@ namespace GameClient.Controllers
         {
             var problem = new Problem
             {
-                Challenge = "(lambda (y) (if0 (and (shr1 y) y) 1 (shr4 (shr1 y))))",
+                Challenge = "(lambda (x_4468) (fold (shl1 x_4468) (shr4 x_4468) (lambda (x_4469 x_4470) (if0 x_4469 x_4469 x_4470))))",
                 Id = id,
-                Size = 10,
-                Operators = new List<string> {"and", "if0", "shr1", "shr4"}
+                Size = 11,
+                Operators = new List<string> { "fold", "if0", "shl1", "shr4" }
             };
 
             Log.InfoFormat("Got training program: {0}", SProgramParser.Parse(problem.Challenge));

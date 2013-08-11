@@ -78,6 +78,41 @@ namespace GameClient.SExpressionTree
             return results;
         }
 
+        public List<ProgramExpression> GenerateProgramRange(int min, int max)
+        {
+            Log.InfoFormat("Generating all programs of size {0} - {1} using operators {2}", min, max,
+                String.Join(",", Operators.Select(x => "\"" + x + "\"")));
+
+            _noFoldCache[1] = NoFoldIds;
+            _foldCache[1] = FoldIds;
+
+            var id = new IdExpression(OpName);
+
+            var sw = new Stopwatch();
+            sw.Start();
+
+            for (var i = 2; i < max; i++)
+            {
+                GenerateExpressions(i, false);
+                if (Operators.Contains("fold"))
+                    GenerateExpressions(i, true);
+            }
+
+            var results = new List<ProgramExpression>();
+            for (var i = min; i <= max; i++)
+            {
+                results.AddRange(_noFoldCache[i - 1].Where(expression =>
+                {
+                    var expressionText = expression.ToString();
+                    return expressionText.Contains(OpName);
+                }).Select(e0 => new ProgramExpression(id, e0)).ToList());
+            }
+
+            Log.InfoFormat("Generated {0} programs in {1:c}", results.Count(), sw.Elapsed);
+
+            return results;
+        }
+
         private List<IExpression> GenerateExpressions(int size, bool inFold)
         {
             if (size == 0)

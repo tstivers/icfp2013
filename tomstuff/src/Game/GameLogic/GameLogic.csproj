@@ -92,6 +92,7 @@
     <Compile Include="SExpressionTree\ProgramExpression.cs" />
     <Compile Include="SExpressionTree\SProgramGenerator.cs" />
     <Compile Include="SExpressionTree\SProgramParser.cs" />
+    <Compile Include="Solvers\BestGuessSolver.cs" />
     <Compile Include="Solvers\BruteForceSolver.cs" />
     <Compile Include="Solvers\SolverBase.cs" />
     <Compile Include="Solvers\Size3Solver.cs" />
