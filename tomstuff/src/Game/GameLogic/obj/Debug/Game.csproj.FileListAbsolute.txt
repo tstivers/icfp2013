@@ -1,9 +1,0 @@
-C:\Users\tstivers\icfp2013\tomstuff\src\Game\GameClient\obj\Debug\Game.csprojResolveAssemblyReference.cache
-C:\Users\tstivers\icfp2013\tomstuff\src\Game\GameClient\obj\Debug\GameClient.dll
-C:\Users\tstivers\icfp2013\tomstuff\src\Game\GameClient\bin\Debug\GameClient.dll
-C:\Users\tstivers\icfp2013\tomstuff\src\Game\GameClient\bin\Debug\GameClient.pdb
-C:\Users\tstivers\icfp2013\tomstuff\src\Game\GameClient\bin\Debug\Newtonsoft.Json.dll
-C:\Users\tstivers\icfp2013\tomstuff\src\Game\GameClient\bin\Debug\RestSharp.dll
-C:\Users\tstivers\icfp2013\tomstuff\src\Game\GameClient\bin\Debug\Newtonsoft.Json.xml
-C:\Users\tstivers\icfp2013\tomstuff\src\Game\GameClient\bin\Debug\RestSharp.xml
-C:\Users\tstivers\icfp2013\tomstuff\src\Game\GameClient\obj\Debug\GameClient.pdb
