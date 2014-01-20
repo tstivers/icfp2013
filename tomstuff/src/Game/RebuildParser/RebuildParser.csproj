@@ -34,10 +34,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="OMetaSharp">
-      <HintPath>..\..\Libs\OMetaSharp.dll</HintPath>
+      <HintPath>..\Libraries\OMetaSharp.dll</HintPath>
     </Reference>
     <Reference Include="OMetaSharp.OMetaCS">
-      <HintPath>..\..\Libs\OMetaSharp.OMetaCS.dll</HintPath>
+      <HintPath>..\Libraries\OMetaSharp.OMetaCS.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
